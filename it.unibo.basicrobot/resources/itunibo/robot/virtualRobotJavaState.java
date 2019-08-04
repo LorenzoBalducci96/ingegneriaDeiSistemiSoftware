@@ -5,8 +5,20 @@ public class virtualRobotJavaState {
 	private static int x = 0;
 	private static int y = 0;
 	
+	public static int getX() {
+		return x;
+	}
+	
+	public static int getY() {
+		return y;
+	}
+	
+	public static String getOrientation() {
+		return orientation;
+	}
+	
 	public static void updateState(String cmd) {
-		if(cmd.equalsIgnoreCase("msg(w)")) {
+		if(cmd.equalsIgnoreCase("msg(i)")) {
 			if(orientation.equalsIgnoreCase("nord")) {
 				y++;
 			}
@@ -20,7 +32,7 @@ public class virtualRobotJavaState {
 				y--;
 			}
 		}
-		if(cmd.equalsIgnoreCase("msg(d)")) {
+		if(cmd.equalsIgnoreCase("msg(r)")) {
 			if(orientation.equalsIgnoreCase("nord")) {
 				orientation="est";
 			}
@@ -34,7 +46,7 @@ public class virtualRobotJavaState {
 				orientation="ovest";
 			}
 		}
-		if(cmd.equalsIgnoreCase("msg(a)")) {
+		if(cmd.equalsIgnoreCase("msg(l)")) {
 			if(orientation.equalsIgnoreCase("nord")) {
 				orientation="ovest";
 			}
@@ -48,7 +60,7 @@ public class virtualRobotJavaState {
 				orientation="est";
 			}
 		}
-		if(cmd.equalsIgnoreCase("msg(s)")) {
+		if(cmd.equalsIgnoreCase("msg(k)")) {
 			if(orientation.equalsIgnoreCase("nord")) {
 				y--;
 			}

@@ -113,6 +113,7 @@ void remoteCmdExecutor()
           case 104 : move(1,0); stopFollow = true;  break;  //h
           case 114 : rotateRight90();  break;  //r
           case 108 : rotateLeft90(); break;    //l
+          case 105 : foward1Square(); break; //i
           case 102 : move(1,0); stopFollow = false; break;  //f
           //default  : move(1,0); stopFollow = true;
           default  : rotateRight90(); stopFollow = true;
@@ -132,12 +133,20 @@ void rotateRight90()
   _delay( 0.555 );
   move(1,0);
 }
+void foward1Square(){
+  Serial.println("rotateRight90");
+  move(2,150);
+  _delay( 0.555 );
+  move(1,0);
+}
 
 /*
  * -----------------------------------
  * Moving
  * -----------------------------------
  */
+
+ /*
 void move(int direction, int speed)
 {
       int leftSpeed  = 0;
@@ -154,6 +163,28 @@ void move(int direction, int speed)
       }else if(direction == 4){ //right
         	leftSpeed = speed;
         	rightSpeed = -speed;
+      }
+      motor_9.run((9)==M1?-(leftSpeed):(leftSpeed));
+      motor_10.run((10)==M1?-(rightSpeed):(rightSpeed));
+}
+*/
+
+void move(int direction, int speed)
+{
+      int leftSpeed  = 0;
+      int rightSpeed = 0;
+      if(direction == 1){ //forward
+          leftSpeed = speed;
+          rightSpeed = speed;
+      }else if(direction == 2){ //backward
+          leftSpeed = -speed;
+          rightSpeed = -speed;
+      }else if(direction == 3){ //left
+          leftSpeed = -speed;
+          rightSpeed = speed;
+      }else if(direction == 4){ //right
+          leftSpeed = speed;
+          rightSpeed = -speed;
       }
       motor_9.run((9)==M1?-(leftSpeed):(leftSpeed));
       motor_10.run((10)==M1?-(rightSpeed):(rightSpeed));

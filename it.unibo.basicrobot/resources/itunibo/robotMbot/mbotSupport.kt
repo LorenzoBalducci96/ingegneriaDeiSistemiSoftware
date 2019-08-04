@@ -22,6 +22,9 @@ object mbotSupport{
 			"msg(a)" -> conn.sendALine("a")
 			"msg(d)" -> conn.sendALine("d")
 			"msg(h)" -> conn.sendALine("h")
+			"msg(i)" -> conn.sendALine("i")
+			"msg(l)" -> conn.sendALine("l")
+			"msg(r)" -> conn.sendALine("r")
 			else -> println("mbotSupport command unknown")
 		}
 	}

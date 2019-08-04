@@ -23,7 +23,6 @@ object robotSupport{
 			"realnano" -> { it.unibo.robotRaspOnly.nanoSupport.move( cmd ) }
 			else       -> println( "robot unknown" )
 		}
-		
 	}
 	
 }

@@ -29,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
     Button backward;
     Button right;
     Button stop;
+    Button forward1Square;
+    Button sparecchia;
 
     ImageButton record;
     TextView insertedText;
@@ -48,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
         forward = findViewById(R.id.forward_button);
         backward = findViewById(R.id.backward_button);
         stop = findViewById(R.id.stop);
+        forward1Square = findViewById(R.id.forward1Square);
+        sparecchia = findViewById(R.id.sparecchia);
 
         connection = new MqttConnection(this.getApplicationContext());
 
@@ -59,6 +63,29 @@ public class MainActivity extends AppCompatActivity {
         //final String LOGTAG = "";
 
 
+        forward1Square.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                connection.SendCommand("unibo/qak/events", "msg(userCmd,event,frontend,none,userCmd(i),14)");
+            }
+        });
+
+        sparecchia.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                connection.SendCommand("unibo/qak/events", "msg(maitreCmd,event,frontend,none,maitreCmd(c),10)");
+            }
+        });
+
+        stop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                connection.SendCommand("unibo/qak/events", "msg(userCmd,event,frontend,none,userCmd(h),14)");
+            }
+        });
+
+
+
 
         record.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,140 +93,6 @@ public class MainActivity extends AppCompatActivity {
                 speak();
             }
         });
-
-        /*
-        try {
-            client.connect(null, new IMqttActionListener() {
-
-                @Override
-                public void onSuccess(IMqttToken mqttToken) {
-
-                    //Log.i(LOGTAG, "Client connected");
-                    //Log.i(LOGTAG, "Topics="+mqttToken.getTopics());
-
-                    forward.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            MqttMessage message = new MqttMessage("msg(userCmd,event,frontend,none,userCmd(w),14)".getBytes());
-                            message.setQos(2);
-                            message.setRetained(false);
-
-                            try {
-                                client.publish("unibo/qak/events", message);
-                                Log.i(LOGTAG, "Message published");
-
-                                //client.disconnect();
-                                //Log.i(LOGTAG, "client disconnected");
-                            } catch (MqttPersistenceException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            } catch (MqttException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                    backward.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            MqttMessage message = new MqttMessage("msg(userCmd,event,frontend,none,userCmd(s),30)".getBytes());
-                            message.setQos(2);
-                            message.setRetained(false);
-
-                            try {
-                                client.publish("unibo/qak/events", message);
-                                Log.i(LOGTAG, "Message published");
-
-                                //client.disconnect();
-                                //Log.i(LOGTAG, "client disconnected");
-                            } catch (MqttPersistenceException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            } catch (MqttException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                    right.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            MqttMessage message = new MqttMessage("msg(userCmd,event,frontend,none,userCmd(d),38)".getBytes());
-                            message.setQos(2);
-                            message.setRetained(false);
-
-                            try {
-                                client.publish("unibo/qak/events", message);
-                                Log.i(LOGTAG, "Message published");
-
-                                //client.disconnect();
-                                //Log.i(LOGTAG, "client disconnected");
-                            } catch (MqttPersistenceException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            } catch (MqttException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                    left.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            MqttMessage message = new MqttMessage("msg(userCmd,event,frontend,none,userCmd(a),42)".getBytes());
-                            message.setQos(2);
-                            message.setRetained(false);
-
-                            try {
-                                client.publish("unibo/qak/events", message);
-                                Log.i(LOGTAG, "Message published");
-
-                                //client.disconnect();
-                                //Log.i(LOGTAG, "client disconnected");
-                            } catch (MqttPersistenceException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            } catch (MqttException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                    stop.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            MqttMessage message = new MqttMessage("msg(userCmd,event,frontend,none,userCmd(h),44)".getBytes());
-                            message.setQos(2);
-                            message.setRetained(false);
-
-                            try {
-                                client.publish("unibo/qak/events", message);
-                                Log.i(LOGTAG, "Message published");
-
-                                //client.disconnect();
-                                //Log.i(LOGTAG, "client disconnected");
-                            } catch (MqttPersistenceException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            } catch (MqttException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                }
-
-                @Override
-                public void onFailure(IMqttToken arg0, Throwable arg1) {
-                    // TODO Auto-generated method stub
-                    Log.i(LOGTAG, "Client connection failed: "+arg1.getMessage());
-
-                }
-            });
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        */
     }
 
     private void speak(){

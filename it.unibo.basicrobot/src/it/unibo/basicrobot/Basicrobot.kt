@@ -26,6 +26,7 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 						{ println("no robot")
 						 }
 						if(currentSolution.isSuccess()) { itunibo.robot.robotSupport.create(myself ,getCurSol("R").toString(), getCurSol("PORT").toString() )
+						itunibo.robot.plannerBhestie.create(myself)
 						 }
 						itunibo.robot.robotSupport.move( "msg(a)"  )
 						delay(700) 
@@ -40,6 +41,7 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 					}
 					 transition(edgeName="t00",targetState="handleUserCmd",cond=whenEvent("userCmd"))
 					transition(edgeName="t01",targetState="handleUserCmd",cond=whenDispatch("robotCmd"))
+					transition(edgeName="t02",targetState="handleMaitreCmd",cond=whenEvent("maitreCmd"))
 				}	 
 				state("handleUserCmd") { //this:State
 					action { //it:State
@@ -58,6 +60,30 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 						}
 					}
 					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
+				}	 
+				state("handleMaitreCmd") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("maitreCmd(X)"), Term.createTerm("maitreCmd(ACTION)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								itunibo.robot.plannerBhestie.action( "msg(${payloadArg(0)})"  )
+								itunibo.robot.virtualRobotJavaState.updateState( "msg(${payloadArg(0)})"  )
+								itunibo.robot.virtualRobotJavaState.printState(  )
+						}
+						if( checkMsgContent( Term.createTerm("plannerCmd(X)"), Term.createTerm("plannerCmd(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})"  )
+								itunibo.robot.virtualRobotJavaState.updateState( "msg(${payloadArg(0)})"  )
+								itunibo.robot.virtualRobotJavaState.printState(  )
+						}
+					}
+					 transition(edgeName="t03",targetState="handleMaitreCmd",cond=whenEvent("plannerCmd"))
+					transition(edgeName="t04",targetState="stopped",cond=whenEvent("userCmd"))
+					transition(edgeName="t05",targetState="waitCmd",cond=whenEvent("endTaskEventCmd"))
+				}	 
+				state("stopped") { //this:State
+					action { //it:State
+					}
+					 transition(edgeName="t06",targetState="handleMaitreCmd",cond=whenEvent("userCmd"))
 				}	 
 			}
 		}
