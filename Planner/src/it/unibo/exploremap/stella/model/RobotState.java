@@ -9,7 +9,9 @@ public class RobotState {
 	public RobotState(int x, int y, Direction direction, Goal goal) {
 		if (x<0 || y<0 || (direction != Direction.UP && 
 				direction != Direction.RIGHT && direction != Direction.DOWN && 
-				direction != Direction.LEFT))
+				direction != Direction.LEFT) || ((goal != Goal.DISHWASHER &&
+				goal != Goal.FRIDGE && goal != Goal.HR && 
+				goal != Goal.PANTRY && goal != Goal.TABLE)))
 			throw new IllegalArgumentException();
 		this.x = x;
 		this.y = y;

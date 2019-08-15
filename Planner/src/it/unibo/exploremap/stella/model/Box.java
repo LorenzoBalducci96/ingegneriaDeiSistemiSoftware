@@ -9,7 +9,7 @@ public class Box {
 	private boolean isRobot;
 	
 	//Costruttore completo
-	public Box(boolean isObstacle, boolean isTable, boolean isPantry, boolean isFridge, boolean isDishwaser,
+	private Box(boolean isObstacle, boolean isTable, boolean isPantry, boolean isFridge, boolean isDishwaser,
 			boolean isRobot) {
 		this.isObstacle = isObstacle;
 		this.isTable = isTable;
@@ -18,15 +18,40 @@ public class Box {
 		this.isDishwaser = isDishwaser;
 		this.isRobot = isRobot;
 	}
+
+	//Casella dishwasher
+	public static Box createDishwasher() {
+		return new Box(false, false, true, false, false, false);
+	}
+
+	//Casella fridge
+	public static Box createFridge() {
+		return new Box(false, false, false, true, false, false);
+	}
+
+	//Casella pantry
+	public static Box createPantry() {
+		return new Box(false, false, true, false, false, false);
+	}
+
+	//Casella table
+	public static Box createTable() {
+		return new Box(true, true, false, false, false, false);
+	}
+	
+	//Casella robot
+	public static Box createRobot() {
+		return new Box(false, false, false, false, false, true);
+	}
 	
 	//Casella ostacolo
-	public Box(boolean isObstacle) {
-		this(isObstacle, false, false, false, false, false);
+	public static Box createObstacle() {
+		return new Box(true, false, false, false, false, false);
 	}
 	
 	//Casella normale
-	public Box() {
-		this(false, false, false, false, false, false);
+	public static Box createNormalBox() {
+		return new Box(false, false, false, false, false, false);
 	}
 	
 	public void setRobot(boolean isRobot) {

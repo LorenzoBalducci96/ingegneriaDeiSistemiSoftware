@@ -51,7 +51,7 @@ private static RobotState initialState;
 	
 	public static List<Action> doPlan(   ) throws Exception {
  		List<Action> actions;
-// 		GoalTest goalTest= new Functions();
+ 		GoalTest goalTest= new Functions();
 		SearchAgent searchAgent;
  //		System.out.println("aiutil doPlan newProblem (A) " );
 		Problem problem = new Problem(initialState, new Functions(), new Functions(), goalTest, new Functions());
@@ -139,31 +139,39 @@ private static RobotState initialState;
     	 	case "w" :   
 		  		//RoomMap.getRoomMap().put(x, y, new Box(false, false, false)); //clean the cell
  			  	initialState = (RobotState) new Functions().result(initialState, new RobotAction(RobotAction.FORWARD));
-			  	RoomMap.getRoomMap().putRobot(initialState.getX(), initialState.getY(), new Box(false, false, false, false, false, true));
+			  	//RoomMap.getRoomMap().putRobot(initialState.getX(), initialState.getY(), new Box(false, false, false, false, false, true));
+			  	RoomMap.getRoomMap().put(initialState.getX(), initialState.getY(), Box.createRobot());
  	 			break ;
 	 		case "s" :   
 				initialState = (RobotState) new Functions().result(initialState, new RobotAction(RobotAction.BACKWARD));
-				RoomMap.getRoomMap().putRobot(initialState.getX(), initialState.getY(), new Box(false, false, false, false, false, true));
+				//RoomMap.getRoomMap().putRobot(initialState.getX(), initialState.getY(), new Box(false, false, false, false, false, true));
+			  	RoomMap.getRoomMap().put(initialState.getX(), initialState.getY(), Box.createRobot());
 				break ;
 			case "a" : 
  	 			initialState = (RobotState) new Functions().result(initialState, new RobotAction(RobotAction.TURNLEFT));
-	 			RoomMap.getRoomMap().putRobot(initialState.getX(), initialState.getY(), new Box(false, false, false, false, false, true));
+	 			//RoomMap.getRoomMap().putRobot(initialState.getX(), initialState.getY(), new Box(false, false, false, false, false, true));
+			  	RoomMap.getRoomMap().put(initialState.getX(), initialState.getY(), Box.createRobot());
 				break ;
 			case "d" :  
 	 			initialState = (RobotState) new Functions().result(initialState, new RobotAction(RobotAction.TURNRIGHT));
-	 			RoomMap.getRoomMap().putRobot(initialState.getX(), initialState.getY(), new Box(false, false, false, false, false, true));
+	 			//RoomMap.getRoomMap().putRobot(initialState.getX(), initialState.getY(), new Box(false, false, false, false, false, true));
+			  	RoomMap.getRoomMap().put(initialState.getX(), initialState.getY(), Box.createRobot());
 				break ;
 			case "obstacleOnRight" :   
-				RoomMap.getRoomMap().putObstacle(x+1, y, new Box(true, false, false, false, false, false));
+				//RoomMap.getRoomMap().putObstacle(x+1, y, new Box(true, false, false, false, false, false));
+				RoomMap.getRoomMap().put(x+1, y, Box.createObstacle());
 				break ;		
 			case "obstacleOnLeft" :   
-				RoomMap.getRoomMap().putObstacle(x-1, y, new Box(true, false, false, false, false, false));
+				//RoomMap.getRoomMap().putObstacle(x-1, y, new Box(true, false, false, false, false, false));
+				RoomMap.getRoomMap().put(x-1, y, Box.createObstacle());
 				break ;		
 			case "obstacleOnUp" :   
-				RoomMap.getRoomMap().putObstacle(x, y-1, new Box(true, false, false, false, false, false));
+				//RoomMap.getRoomMap().putObstacle(x, y-1, new Box(true, false, false, false, false, false));
+				RoomMap.getRoomMap().put(x, y-1, Box.createObstacle());
 				break ;		
 			case "obstacleOnDown" :   
-				RoomMap.getRoomMap().putObstacle(x, y+1, new Box(true, false, false, false, false, false));
+				//RoomMap.getRoomMap().putObstacle(x, y+1, new Box(true, false, false, false, false, false));
+				RoomMap.getRoomMap().put(x, y+1, Box.createObstacle());
 				break ;
 			
 			}//switch

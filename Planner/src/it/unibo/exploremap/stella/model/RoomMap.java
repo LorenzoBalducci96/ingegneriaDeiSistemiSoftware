@@ -24,18 +24,18 @@ public class RoomMap {
 			}
 		}
 		//Metto il robot in HR (0,0)
-		this.putRobot(0, 0, new Box(false, false, false, false, false, true));
-		this.putTable(5, 5, new Box(true, true, false, false, false, false)); //Il tavolo è anche un ostacolo
-		this.putDishwasher(10, 10, new Box(false, false, false, false, true, false));
-		this.putFridge(10, 0, new Box(false, false, false, true, false, false));
-		this.putPantry(0, 10, new Box(false, false, true, false, false, false));
+		this.put(0, 0, Box.createRobot());
+		this.put(2, 2, Box.createTable()); //Il tavolo è anche un ostacolo
+		this.put(4, 4, Box.createDishwasher());
+		this.put(0, 4, Box.createFridge());
+		this.put(4, 0, Box.createPantry());
 	}
 	
 //	public Map<Coordinate, Box> getMapClone() {
 //		return new HashMap<>(this.roomMap);
 //	}
 	
-	/*public void put(int x, int y, Box box) {
+	public void put(int x, int y, Box box) {
 		try {
 			roomMap.get(y);
 		} catch (IndexOutOfBoundsException e) {
@@ -50,13 +50,13 @@ public class RoomMap {
 			roomMap.get(y).add(x, box);
 		} catch (IndexOutOfBoundsException e) {
 			for (int j=roomMap.get(y).size(); j<x; j++) {
-				roomMap.get(y).add(new Box(false, true, false));
+				roomMap.get(y).add(Box.createNormalBox());
 			}
 			roomMap.get(y).add(x, box);
 		}
-	}*/
+	}
 	
-	public void putObstacle(int x, int y, Box box) {
+	/*public void putObstacle(int x, int y, Box box) {
 		try {
 			roomMap.get(y);
 		} catch (IndexOutOfBoundsException e) {
@@ -181,7 +181,7 @@ public class RoomMap {
 			}
 			roomMap.get(y).add(x, box);
 		}
-	}
+	}*/
 	
 	public boolean isObstacle(int x, int y) {
 		try {
