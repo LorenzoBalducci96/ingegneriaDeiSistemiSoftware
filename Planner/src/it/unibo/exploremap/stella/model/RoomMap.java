@@ -1,10 +1,9 @@
 package it.unibo.exploremap.stella.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class RoomMap {
+	private final static int ROOMSIZE = 5;
 	private static RoomMap singletonRoomMap;
+	
 	public static RoomMap getRoomMap() {
 		if (singletonRoomMap == null)
 			singletonRoomMap = new RoomMap();
@@ -13,179 +12,47 @@ public class RoomMap {
 	
 	
 	
-	private List<ArrayList<Box>> roomMap = new ArrayList<ArrayList<Box>>();
+	//private List<ArrayList<Box>> roomMap = new ArrayList<ArrayList<Box>>();
+	private Box[][] roomMap;
 	
 	private RoomMap() {
-		super();
-		for (int i=0; i<1; i++) {
-			roomMap.add(new ArrayList<Box>());
-			for (int j=0; j<1; j++) {
-				roomMap.get(i).add(null);
+		roomMap = new Box[ROOMSIZE][ROOMSIZE];
+		
+		for(int i = 0; i < ROOMSIZE; i++) {
+			for(int j = 0; j < ROOMSIZE; j++) {
+				roomMap[i][j] = Box.createNormalBox();
 			}
 		}
-		//Metto il robot in HR (0,0)
-		this.put(0, 0, Box.createRobot());
-		this.put(2, 2, Box.createTable()); //Il tavolo è anche un ostacolo
-		this.put(4, 4, Box.createDishwasher());
-		this.put(0, 4, Box.createFridge());
-		this.put(4, 0, Box.createPantry());
+		
+		roomMap[0][0] = Box.createRobot();
+		roomMap[2][2] = Box.createTable();
+		roomMap[4][4] = Box.createDishwasher();
+		roomMap[0][4] = Box.createFridge();
+		roomMap[4][0] = Box.createPantry();
 	}
 	
-//	public Map<Coordinate, Box> getMapClone() {
-//		return new HashMap<>(this.roomMap);
-//	}
-	
 	public void put(int x, int y, Box box) {
-		try {
+		/*try {
 			roomMap.get(y);
 		} catch (IndexOutOfBoundsException e) {
-			for (int i=roomMap.size(); i<y; i++) {
-				roomMap.add(new ArrayList<Box>());
-			}
-			roomMap.add(y, new ArrayList<Box>());
-		}
-		try {
-			roomMap.get(y).get(x);
-			roomMap.get(y).remove(x);
 			roomMap.get(y).add(x, box);
 		} catch (IndexOutOfBoundsException e) {
 			for (int j=roomMap.get(y).size(); j<x; j++) {
+				roomMap.get(y).add(new Box(false, true, false));
 				roomMap.get(y).add(Box.createNormalBox());
 			}
 			roomMap.get(y).add(x, box);
-		}
+		}*/
+		
+		if(x < 0 || x > ROOMSIZE || y < 0 || y > ROOMSIZE)
+			return;
+		
+		roomMap[x][y] = box;
 	}
-	
-	/*public void putObstacle(int x, int y, Box box) {
-		try {
-			roomMap.get(y);
-		} catch (IndexOutOfBoundsException e) {
-			for (int i=roomMap.size(); i<y; i++) {
-				roomMap.add(new ArrayList<Box>());
-			}
-			roomMap.add(y, new ArrayList<Box>());
-		}
-		try {
-			roomMap.get(y).get(x);
-			roomMap.get(y).remove(x);
-			roomMap.get(y).add(x, box);
-		} catch (IndexOutOfBoundsException e) {
-			for (int j=roomMap.get(y).size(); j<x; j++) {
-				roomMap.get(y).add(new Box(true, false, false, false, false, false));
-			}
-			roomMap.get(y).add(x, box);
-		}
-	}
-	
-	public void putRobot(int x, int y, Box box) {
-		try {
-			roomMap.get(y);
-		} catch (IndexOutOfBoundsException e) {
-			for (int i=roomMap.size(); i<y; i++) {
-				roomMap.add(new ArrayList<Box>());
-			}
-			roomMap.add(y, new ArrayList<Box>());
-		}
-		try {
-			roomMap.get(y).get(x);
-			roomMap.get(y).remove(x);
-			roomMap.get(y).add(x, box);
-		} catch (IndexOutOfBoundsException e) {
-			for (int j=roomMap.get(y).size(); j<x; j++) {
-				roomMap.get(y).add(new Box(false, false, false, false, false, true));
-			}
-			roomMap.get(y).add(x, box);
-		}
-	}
-	
-	public void putTable(int x, int y, Box box) {
-		try {
-			roomMap.get(y);
-		} catch (IndexOutOfBoundsException e) {
-			for (int i=roomMap.size(); i<y; i++) {
-				roomMap.add(new ArrayList<Box>());
-			}
-			roomMap.add(y, new ArrayList<Box>());
-		}
-		try {
-			roomMap.get(y).get(x);
-			roomMap.get(y).remove(x);
-			roomMap.get(y).add(x, box);
-		} catch (IndexOutOfBoundsException e) {
-			for (int j=roomMap.get(y).size(); j<x; j++) {
-				roomMap.get(y).add(new Box(true, true, false, false, false, false));
-			}
-			roomMap.get(y).add(x, box);
-		}
-	}
-	
-	public void putDishwasher(int x, int y, Box box) {
-		try {
-			roomMap.get(y);
-		} catch (IndexOutOfBoundsException e) {
-			for (int i=roomMap.size(); i<y; i++) {
-				roomMap.add(new ArrayList<Box>());
-			}
-			roomMap.add(y, new ArrayList<Box>());
-		}
-		try {
-			roomMap.get(y).get(x);
-			roomMap.get(y).remove(x);
-			roomMap.get(y).add(x, box);
-		} catch (IndexOutOfBoundsException e) {
-			for (int j=roomMap.get(y).size(); j<x; j++) {
-				roomMap.get(y).add(new Box(false, false, false, false, true, false));
-			}
-			roomMap.get(y).add(x, box);
-		}
-	}
-	
-	public void putFridge(int x, int y, Box box) {
-		try {
-			roomMap.get(y);
-		} catch (IndexOutOfBoundsException e) {
-			for (int i=roomMap.size(); i<y; i++) {
-				roomMap.add(new ArrayList<Box>());
-			}
-			roomMap.add(y, new ArrayList<Box>());
-		}
-		try {
-			roomMap.get(y).get(x);
-			roomMap.get(y).remove(x);
-			roomMap.get(y).add(x, box);
-		} catch (IndexOutOfBoundsException e) {
-			for (int j=roomMap.get(y).size(); j<x; j++) {
-				roomMap.get(y).add(new Box(false, false, false, true, false, false));
-			}
-			roomMap.get(y).add(x, box);
-		}
-	}
-	
-	
-	public void putPantry(int x, int y, Box box) {
-		try {
-			roomMap.get(y);
-		} catch (IndexOutOfBoundsException e) {
-			for (int i=roomMap.size(); i<y; i++) {
-				roomMap.add(new ArrayList<Box>());
-			}
-			roomMap.add(y, new ArrayList<Box>());
-		}
-		try {
-			roomMap.get(y).get(x);
-			roomMap.get(y).remove(x);
-			roomMap.get(y).add(x, box);
-		} catch (IndexOutOfBoundsException e) {
-			for (int j=roomMap.get(y).size(); j<x; j++) {
-				roomMap.get(y).add(new Box(false, false, true, false, false, false));
-			}
-			roomMap.get(y).add(x, box);
-		}
-	}*/
 	
 	public boolean isObstacle(int x, int y) {
 		try {
-			Box box = roomMap.get(y).get(x);
+			Box box = roomMap[x][y];
 			//System.out.println(" ... RoomMap  isObstacle " + box.isObstacle());
 			if  (box == null)
 				return false;
@@ -200,7 +67,7 @@ public class RoomMap {
 	
 	public boolean isTable(int x, int y) {
 		try {
-			Box box = roomMap.get(y).get(x);
+			Box box = roomMap[x][y];
 			if  (box == null)
 				return true;
 			if (box.isTable())
@@ -214,7 +81,7 @@ public class RoomMap {
 	
 	public boolean isFridge(int x, int y) {
 		try {
-			Box box = roomMap.get(y).get(x);
+			Box box = roomMap[x][y];
 			if  (box == null)
 				return true;
 			if (box.isFridge())
@@ -228,7 +95,7 @@ public class RoomMap {
 	
 	public boolean isDishwasher(int x, int y) {
 		try {
-			Box box = roomMap.get(y).get(x);
+			Box box = roomMap[x][y];
 			if  (box == null)
 				return true;
 			if (box.isDishwaser())
@@ -242,7 +109,7 @@ public class RoomMap {
 	
 	public boolean isPantry(int x, int y) {
 		try {
-			Box box = roomMap.get(y).get(x);
+			Box box = roomMap[x][y];
 			if  (box == null)
 				return true;
 			if (box.isPantry())
@@ -256,7 +123,7 @@ public class RoomMap {
 
 	public boolean isHR(int x, int y) {
 		try {
-			Box box = roomMap.get(y).get(x);
+			Box box = roomMap[x][y];
 			if  (box == null)
 				return true;
 			if (x == 0 && y == 0)
@@ -282,40 +149,40 @@ public class RoomMap {
 		if (y<=0)
 			return false;
 		try {
-			Box box = roomMap.get(y-1).get(x);
+			Box box = roomMap[x][y-1];
 			if  (box == null)
 				return true;
 			if (box.isObstacle())
 				return false;
 			return true;
 		} catch (IndexOutOfBoundsException e) {
-			return true;
+			return false;
 		}
 	}
 	
 	public boolean canMoveRight(int x, int y) {
 		try {
-			Box box = roomMap.get(y).get(x+1);
+			Box box = roomMap[x+1][y];
 			if  (box == null)
 				return true;
 			if (box.isObstacle())
 				return false;
 			return true;
 		} catch (IndexOutOfBoundsException e) {
-			return true;
+			return false;
 		}
 	}
 
 	public boolean canMoveDown(int x, int y) {
 		try {
-			Box box = roomMap.get(y+1).get(x);
+			Box box = roomMap[x][y+1];
 			if  (box == null)
 				return true;
 			if (box.isObstacle())
 				return false;
 			return true;
 		} catch (IndexOutOfBoundsException e) {
-			return true;
+			return false;
 		}
 	}
 	
@@ -323,36 +190,38 @@ public class RoomMap {
 		if (x<=0)
 			return false;
 		try {
-			Box box = roomMap.get(y).get(x-1);
+			Box box = roomMap[x-1][y];
 			if  (box == null)
 				return true;
 			if (box.isObstacle())
 				return false;
 			return true;
 		} catch (IndexOutOfBoundsException e) {
-			return true;
+			return false;
 		}
 	}
 	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		for (ArrayList<Box> a : roomMap) {
-			builder.append("|");
-			for (Box b : a) {
-				if (b == null)
+		Box box;
+		
+		for(int i = 0; i < ROOMSIZE; i++) {
+			for(int j = 0; j < ROOMSIZE; j++) {
+				box = roomMap[i][j];
+				if (box == null)
 					break;
-				if (b.isRobot())
+				if (box.isRobot())
 					builder.append("r, ");
-				else if (b.isObstacle())
-					builder.append("X, ");
-				else if(b.isDishwaser())
-					builder.append("D, ");
-				else if(b.isTable())
+				else if(box.isTable())
 					builder.append("T, ");
-				else if(b.isPantry())
+				else if (box.isObstacle())
+					builder.append("X, ");
+				else if(box.isDishwaser())
+					builder.append("D, ");
+				else if(box.isPantry())
 					builder.append("P, ");
-				else if(b.isFridge())
+				else if(box.isFridge())
 					builder.append("F, ");
 				else
 					builder.append("0, ");
@@ -364,45 +233,15 @@ public class RoomMap {
 	
 	public int getDimX() {
 		int result=0;
-		for (int i=0; i<roomMap.size(); i++) {
-			if (result<roomMap.get(i).size())
-				result = roomMap.get(i).size();
+		for (int i=0; i < ROOMSIZE; i++) {
+			if (result < roomMap.length)
+				result = roomMap[i].length;
 		}
 		return result;
 	}
 	
 	public int getDimY() {
-		return roomMap.size();
+		return roomMap.length;
 	}
-	/*
-	public boolean isClean() {
-		for (ArrayList<Box> row : roomMap) {
-			for (Box b : row)
-				if (b.isDirty())
-					return false;
-		}
-		return true;
-	}
-	
-	public void setObstacles() {
-		for (ArrayList<Box> row : roomMap) {
-			for (Box b : row) {
-				if (!b.isObstacle() && b.isDirty()) {
-					b.setDirty(false);
-					b.setObstacle(true);
-				}
-			}
-		}
-	}
-	
-	public void setDirty() {
-		for (ArrayList<Box> row : roomMap) {
-			for (Box b : row) {
-				if (!b.isObstacle() && !b.isDirty() && !b.isRobot()) //Robot is always clean
-					b.setDirty(true);
-			}
-		}
-	}
-	*/
 	
 }

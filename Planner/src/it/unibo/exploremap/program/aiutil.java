@@ -32,6 +32,7 @@ private static RobotState initialState;
 	public static void initAI() throws Exception {
 		System.out.println("aiutil initAI" );
  		initialState = new RobotState(0, 0, RobotState.Direction.DOWN, Goal.PANTRY); //Prendo prima i piatti
+ 		//initialState = new RobotState(0, 0, RobotState.Direction.DOWN, Goal.DISHWASHER);
 		search = new BreadthFirstSearch(new GraphSearch());
 	}
 	
@@ -98,48 +99,10 @@ private static RobotState initialState;
 				move + " dir=" + dir +" x=" + x + " y="+y + " dimMapX=" + dimMapx + " dimMapY=" + dimMapy   );
 		try {
 			switch( move ){
-			/*
-    	 	case "w" :   
-		  		RoomMap.getRoomMap().put(x, y, new Box(false, false, false)); //clean the cell
- 			  	initialState = (RobotState) new Functions().result(initialState, new RobotAction(RobotAction.FORWARD));
-			  	RoomMap.getRoomMap().put(initialState.getX(), initialState.getY(), new Box(false, false, true));
- 	 			break ;
-	 		case "s" :   
-				initialState = (RobotState) new Functions().result(initialState, new RobotAction(RobotAction.BACKWARD));
-				RoomMap.getRoomMap().put(initialState.getX(), initialState.getY(), new Box(false, false, true));
-				break ;
-			case "a" : 
- 	 			initialState = (RobotState) new Functions().result(initialState, new RobotAction(RobotAction.TURNLEFT));
-	 			RoomMap.getRoomMap().put(initialState.getX(), initialState.getY(), new Box(false, false, true));
-				break ;
-			case "d" :  
-	 			initialState = (RobotState) new Functions().result(initialState, new RobotAction(RobotAction.TURNRIGHT));
-	 			RoomMap.getRoomMap().put(initialState.getX(), initialState.getY(), new Box(false, false, true));
-				break ;
-			case "c" :  	//forward and  clean 	
-				RoomMap.getRoomMap().put(x, y, new Box(false, false, false));
-				initialState = (RobotState) new Functions().result(initialState, new RobotAction(RobotAction.FORWARD));
-				RoomMap.getRoomMap().put(initialState.getX(), initialState.getY(), new Box(false, false, true));
-				break ; 
-			case "obstacleOnRight" :   
-				RoomMap.getRoomMap().put(x+1, y, new Box(true, false, false));
-				break ;		
-			case "obstacleOnLeft" :   
-				RoomMap.getRoomMap().put(x-1, y, new Box(true, false, false));
-				break ;		
-			case "obstacleOnUp" :   
-				RoomMap.getRoomMap().put(x, y-1, new Box(true, false, false));
-				break ;		
-			case "obstacleOnDown" :   
-				RoomMap.getRoomMap().put(x, y+1, new Box(true, false, false));
-				break ;
-			*/
 			
-
     	 	case "w" :   
 		  		//RoomMap.getRoomMap().put(x, y, new Box(false, false, false)); //clean the cell
  			  	initialState = (RobotState) new Functions().result(initialState, new RobotAction(RobotAction.FORWARD));
-			  	//RoomMap.getRoomMap().putRobot(initialState.getX(), initialState.getY(), new Box(false, false, false, false, false, true));
 			  	RoomMap.getRoomMap().put(initialState.getX(), initialState.getY(), Box.createRobot());
  	 			break ;
 	 		case "s" :   

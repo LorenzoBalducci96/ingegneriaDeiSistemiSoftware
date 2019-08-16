@@ -21,7 +21,7 @@ public class Box {
 
 	//Casella dishwasher
 	public static Box createDishwasher() {
-		return new Box(false, false, true, false, false, false);
+		return new Box(false, false, false, false, true, false);
 	}
 
 	//Casella fridge
