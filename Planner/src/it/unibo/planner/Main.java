@@ -4,14 +4,27 @@ import java.util.Iterator;
 import java.util.List;
 
 import aima.core.agent.Action;
+import aima.core.search.framework.SearchAgent;
+import aima.core.search.framework.problem.GoalTest;
+import aima.core.search.framework.problem.Problem;
+import aima.core.search.framework.qsearch.GraphSearch;
+import aima.core.search.uninformed.BreadthFirstSearch;
 import it.unibo.exploremap.program.aiutil;
+import it.unibo.exploremap.stella.model.Functions;
+import it.unibo.exploremap.stella.model.RobotState;
+import it.unibo.exploremap.stella.model.RobotState.Direction;
+import it.unibo.exploremap.stella.model.RobotState.Goal;
 
 public class Main {
+
+	private static RobotState initialState;
+	private static BreadthFirstSearch search ;
+
 	public void demo() {
 		System.out.println("===== demo");
 		try {
-			aiutil.initAI();
-			//aiutil.cleanQa();
+//			aiutil.initFromToAI(3, 2, Direction.LEFT, Goal.HR);
+			aiutil.initFromToAI(2, 3, Direction.DOWN, Goal.TABLE);
 			System.out.println("===== initial map");
 			aiutil.showMap();
 			List<Action> actions = aiutil.doPlan();
@@ -20,22 +33,11 @@ public class Main {
 			System.out.println("===== map after plan");
 			aiutil.showMap();
 		} catch (Exception e) {
- 			e.printStackTrace();
+			e.printStackTrace();
 		}		
 	}
-	
-	protected void doSomeMOve() throws Exception {
-		aiutil.doMove("w");
-		aiutil.doMove("a");
-		aiutil.doMove("w");
-		aiutil.doMove("w");
-		aiutil.doMove("d");
-		aiutil.doMove("w");
-		aiutil.doMove("a");
-		aiutil.doMove("obstacleOnRight");
-	}
-	
-	
+
+
 	protected void executeMoves(List<Action> actions) throws Exception {
 		Iterator<Action> iter = actions.iterator();
 		while( iter.hasNext() ) {

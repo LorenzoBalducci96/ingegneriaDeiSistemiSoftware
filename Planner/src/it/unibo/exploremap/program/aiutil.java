@@ -36,6 +36,20 @@ private static RobotState initialState;
 		search = new BreadthFirstSearch(new GraphSearch());
 	}
 	
+	public static void initFromToAI(int x, int y, Direction direction, Goal goal) {
+		if(x<0 || x>RoomMap.getRoomsize() || y<0 || y>RoomMap.getRoomsize() ||
+				(direction != Direction.DOWN && direction != Direction.LEFT &&
+				direction != Direction.RIGHT && direction != Direction.UP) ||
+				(goal != Goal.DISHWASHER && goal != Goal.FRIDGE && goal != Goal.HR &&
+				goal != Goal.PANTRY && goal != Goal.TABLE))
+			throw new IllegalArgumentException();
+		
+		System.out.println("aiutil initAI" );
+ 		initialState = new RobotState(x, y, direction, goal);
+ 		RoomMap.getRoomMap().put(x, y, Box.createRobot());
+		search = new BreadthFirstSearch(new GraphSearch());
+	}
+	
 	/*
 	public static void cleanQa() throws  Exception {
 		System.out.println("aiutil cleanQa" );

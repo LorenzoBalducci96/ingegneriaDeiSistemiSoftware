@@ -8,6 +8,7 @@ import aima.core.search.framework.problem.ActionsFunction;
 import aima.core.search.framework.problem.GoalTest;
 import aima.core.search.framework.problem.ResultFunction;
 import aima.core.search.framework.problem.StepCostFunction;
+import it.unibo.exploremap.stella.model.RobotState.Direction;
 import it.unibo.exploremap.stella.model.RobotState.Goal;
 
 public class Functions implements ActionsFunction, ResultFunction, StepCostFunction, GoalTest {
@@ -60,7 +61,10 @@ public class Functions implements ActionsFunction, ResultFunction, StepCostFunct
 		
 		switch (goal) {
 		case TABLE:
-			if(RoomMap.getRoomMap().isTable(state.getX(), state.getY()))
+			if((RoomMap.getRoomMap().isSouthToTable(state.getX(), state.getY()) && state.getDirection() == Direction.UP) ||
+					(RoomMap.getRoomMap().isNorthToTable(state.getX(), state.getY()) && state.getDirection() == Direction.DOWN) ||
+					(RoomMap.getRoomMap().isRightToTable(state.getX(), state.getY()) && state.getDirection() == Direction.LEFT) ||
+					(RoomMap.getRoomMap().isLeftToTable(state.getX(), state.getY()) && state.getDirection() == Direction.RIGHT))
 				return true;
 			break;
 		case PANTRY:

@@ -3,34 +3,37 @@ package it.unibo.exploremap.stella.model;
 public class RoomMap {
 	private final static int ROOMSIZE = 5;
 	private static RoomMap singletonRoomMap;
-	
+
 	public static RoomMap getRoomMap() {
 		if (singletonRoomMap == null)
 			singletonRoomMap = new RoomMap();
 		return singletonRoomMap;
 	}
-	
-	
-	
+
+	public static int getRoomsize() {
+		return ROOMSIZE;
+	}
+
+
 	//private List<ArrayList<Box>> roomMap = new ArrayList<ArrayList<Box>>();
 	private Box[][] roomMap;
-	
+
 	private RoomMap() {
 		roomMap = new Box[ROOMSIZE][ROOMSIZE];
-		
+
 		for(int i = 0; i < ROOMSIZE; i++) {
 			for(int j = 0; j < ROOMSIZE; j++) {
 				roomMap[i][j] = Box.createNormalBox();
 			}
 		}
-		
-		roomMap[0][0] = Box.createRobot();
+
+		//roomMap[0][0] = Box.createRobot();
 		roomMap[2][2] = Box.createTable();
 		roomMap[4][4] = Box.createDishwasher();
 		roomMap[0][4] = Box.createFridge();
 		roomMap[4][0] = Box.createPantry();
 	}
-	
+
 	public void put(int x, int y, Box box) {
 		/*try {
 			roomMap.get(y);
@@ -43,13 +46,13 @@ public class RoomMap {
 			}
 			roomMap.get(y).add(x, box);
 		}*/
-		
+
 		if(x < 0 || x > ROOMSIZE || y < 0 || y > ROOMSIZE)
 			return;
-		
+
 		roomMap[x][y] = box;
 	}
-	
+
 	public boolean isObstacle(int x, int y) {
 		try {
 			Box box = roomMap[x][y];
@@ -65,6 +68,80 @@ public class RoomMap {
 		}
 	}
 	
+	public boolean isSouthToTable(int x, int y) {
+		Box box;
+
+		try {
+			box = roomMap[x-1][y];
+			if(box.isTable())
+				return true;
+			return false;
+		} catch (IndexOutOfBoundsException e) {
+			return false;
+		}
+	}
+	
+	public boolean isNorthToTable(int x, int y) {
+		Box box;
+
+		try {
+			box = roomMap[x+1][y];
+			if(box.isTable())
+				return true;
+			return false;
+		} catch (IndexOutOfBoundsException e) {
+			return false;
+		}
+	}
+	
+	public boolean isRightToTable(int x, int y) {
+		Box box;
+
+		try {
+			box = roomMap[x][y-1];
+			if(box.isTable())
+				return true;
+			return false;
+		} catch (IndexOutOfBoundsException e) {
+			return false;
+		}
+	}
+	
+	public boolean isLeftToTable(int x, int y) {
+		Box box;
+
+		try {
+			box = roomMap[x][y+1];
+			if(box.isTable())
+				return true;
+			return false;
+		} catch (IndexOutOfBoundsException e) {
+			return false;
+		}
+	}
+
+	public boolean isNearTable(int x, int y) {
+		Box box;
+
+		try {
+			box = roomMap[x+1][y];
+			if(box.isTable())
+				return true;
+			box = roomMap[x-1][y];
+			if(box.isTable())
+				return true;
+			box = roomMap[x][y+1];
+			if(box.isTable())
+				return true;
+			box = roomMap[x][y-1];
+			if(box.isTable())
+				return true;
+			return false;
+		} catch (IndexOutOfBoundsException e) {
+			return false;
+		}
+	}
+
 	public boolean isTable(int x, int y) {
 		try {
 			Box box = roomMap[x][y];
@@ -78,7 +155,7 @@ public class RoomMap {
 			return true;
 		}
 	}
-	
+
 	public boolean isFridge(int x, int y) {
 		try {
 			Box box = roomMap[x][y];
@@ -92,7 +169,7 @@ public class RoomMap {
 			return true;
 		}
 	}
-	
+
 	public boolean isDishwasher(int x, int y) {
 		try {
 			Box box = roomMap[x][y];
@@ -106,7 +183,7 @@ public class RoomMap {
 			return true;
 		}
 	}
-	
+
 	public boolean isPantry(int x, int y) {
 		try {
 			Box box = roomMap[x][y];
@@ -134,7 +211,7 @@ public class RoomMap {
 			return true;
 		}
 	}
-	
+
 	public boolean canMove(int x, int y, RobotState.Direction direction) {
 		switch (direction) {
 		case UP: return canMoveUp(x, y);
@@ -144,7 +221,7 @@ public class RoomMap {
 		default: throw new IllegalArgumentException("Not a valid direction");
 		}
 	}
-	
+
 	public boolean canMoveUp(int x, int y) {
 		if (y<=0)
 			return false;
@@ -159,7 +236,7 @@ public class RoomMap {
 			return false;
 		}
 	}
-	
+
 	public boolean canMoveRight(int x, int y) {
 		try {
 			Box box = roomMap[x+1][y];
@@ -185,7 +262,7 @@ public class RoomMap {
 			return false;
 		}
 	}
-	
+
 	public boolean canMoveLeft(int x, int y) {
 		if (x<=0)
 			return false;
@@ -200,12 +277,12 @@ public class RoomMap {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		Box box;
-		
+
 		for(int i = 0; i < ROOMSIZE; i++) {
 			for(int j = 0; j < ROOMSIZE; j++) {
 				box = roomMap[i][j];
@@ -217,6 +294,8 @@ public class RoomMap {
 					builder.append("T, ");
 				else if (box.isObstacle())
 					builder.append("X, ");
+				else if(i == 0 && j == 0)
+					builder.append("H, ");
 				else if(box.isDishwaser())
 					builder.append("D, ");
 				else if(box.isPantry())
@@ -230,7 +309,7 @@ public class RoomMap {
 		}
 		return builder.toString();
 	}
-	
+
 	public int getDimX() {
 		int result=0;
 		for (int i=0; i < ROOMSIZE; i++) {
@@ -239,9 +318,9 @@ public class RoomMap {
 		}
 		return result;
 	}
-	
+
 	public int getDimY() {
 		return roomMap.length;
 	}
-	
+
 }
