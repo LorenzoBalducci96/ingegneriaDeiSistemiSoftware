@@ -49,14 +49,10 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 						if( checkMsgContent( Term.createTerm("robotCmd(CMD)"), Term.createTerm("robotCmd(MOVE)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})"  )
-								itunibo.robot.virtualRobotJavaState.updateState( "msg(${payloadArg(0)})"  )
-								itunibo.robot.virtualRobotJavaState.printState(  )
 						}
 						if( checkMsgContent( Term.createTerm("userCmd(X)"), Term.createTerm("userCmd(MOVE)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})"  )
-								itunibo.robot.virtualRobotJavaState.updateState( "msg(${payloadArg(0)})"  )
-								itunibo.robot.virtualRobotJavaState.printState(  )
 						}
 					}
 					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
@@ -66,12 +62,10 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 						if( checkMsgContent( Term.createTerm("maitreCmd(X)"), Term.createTerm("maitreCmd(ACTION)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								itunibo.robot.plannerBhestie.action( "msg(${payloadArg(0)})"  )
-								itunibo.robot.virtualRobotJavaState.printState(  )
 						}
 						if( checkMsgContent( Term.createTerm("plannerCmd(X)"), Term.createTerm("plannerCmd(X)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})"  )
-								itunibo.robot.virtualRobotJavaState.printState(  )
 						}
 					}
 					 transition(edgeName="t03",targetState="handleMaitreCmd",cond=whenEvent("plannerCmd"))

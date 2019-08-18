@@ -45,13 +45,9 @@ QActor basicrobot context ctxBasicRobot {
 		printCurrentMessage 
 		onMsg( robotCmd : robotCmd( MOVE ) ) { //MOVE = w | a | s | d | h | l | r | i
 			run itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})" ) 
-			run itunibo.robot.virtualRobotJavaState.updateState("msg(${payloadArg(0)})")
-			run itunibo.robot.virtualRobotJavaState.printState()
 		}	
 		onMsg( userCmd : userCmd( MOVE ) ) { //MOVE = w | a | s | d | h | l | r | i
  			run itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})" ) 
- 			run itunibo.robot.virtualRobotJavaState.updateState("msg(${payloadArg(0)})")
-			run itunibo.robot.virtualRobotJavaState.printState()
 		}
 	}
 	Goto waitCmd
@@ -59,11 +55,11 @@ QActor basicrobot context ctxBasicRobot {
 	State handleMaitreCmd{
 		onMsg( maitreCmd : maitreCmd(ACTION)){
 			run itunibo.robot.plannerBhestie.action("msg(${payloadArg(0)})")
-			run itunibo.robot.virtualRobotJavaState.printState()
+			//run itunibo.robot.virtualRobotJavaState.printState()
 		}
 		onMsg( plannerCmd : plannerCmd(X)){
 			run itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})" ) 
-			run itunibo.robot.virtualRobotJavaState.printState()
+			//run itunibo.robot.virtualRobotJavaState.printState()
 		}
 	}
 	Transition t0 whenEvent	plannerCmd -> handleMaitreCmd

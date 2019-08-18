@@ -20,59 +20,59 @@ public class virtualRobotJavaState {
 	}
 	
 	public static void updateState(String cmd) {
-		if(cmd.equalsIgnoreCase("msg(i)")) {
+		if(cmd.equalsIgnoreCase("msg(i)") || cmd.equalsIgnoreCase("msg(w)")) {
 			if(direction.equals(Direction.UP)) {
 				y++;
 			}
-			if(direction.equals(Direction.RIGHT)) {
+			else if(direction.equals(Direction.RIGHT)) {
 				x++;
 			}
-			if(direction.equals(Direction.LEFT)) {
+			else if(direction.equals(Direction.LEFT)) {
 				x--;
 			}
-			if(direction.equals(Direction.DOWN)) {
+			else if(direction.equals(Direction.DOWN)) {
 				y--;
 			}
 		}
-		if(cmd.equalsIgnoreCase("msg(r)")) {
+		if(cmd.equalsIgnoreCase("msg(r)")  || cmd.equalsIgnoreCase("msg(d)")) {
 			if(direction.equals(Direction.UP)) {
 				direction = Direction.RIGHT;
 			}
-			if(direction.equals(Direction.RIGHT)) {
+			else if(direction.equals(Direction.RIGHT)) {
 				direction = Direction.DOWN;
 			}
-			if(direction.equals(Direction.LEFT)) {
+			else if(direction.equals(Direction.LEFT)) {
 				direction = Direction.UP;
 			}
-			if(direction.equals(Direction.DOWN)) {
+			else if(direction.equals(Direction.DOWN)) {
 				direction = Direction.LEFT ;
 			}
 		}
-		if(cmd.equalsIgnoreCase("msg(l)")) {
+		if(cmd.equalsIgnoreCase("msg(l)")  || cmd.equalsIgnoreCase("msg(a)")) {
 			if(direction.equals(Direction.UP)) {
 				direction = Direction.LEFT;
 			}
-			if(direction.equals(Direction.RIGHT)) {
+			else if(direction.equals(Direction.RIGHT)) {
 				direction = Direction.UP;
 			}
-			if(direction.equals(Direction.LEFT)) {
+			else if(direction.equals(Direction.LEFT)) {
 				direction = Direction.DOWN;
 			}
-			if(direction.equals(Direction.DOWN)) {
+			else if(direction.equals(Direction.DOWN)) {
 				direction = direction.RIGHT;
 			}
 		}
-		if(cmd.equalsIgnoreCase("msg(k)")) {
+		if(cmd.equalsIgnoreCase("msg(h)") || cmd.equalsIgnoreCase("msg(h)")) {
 			if(direction.equals(Direction.UP)) {
 				y--;
 			}
-			if(direction.equals(Direction.RIGHT)) {
+			else if(direction.equals(Direction.RIGHT)) {
 				x--;
 			}
-			if(direction.equals(Direction.LEFT)) {
+			else if(direction.equals(Direction.LEFT)) {
 				x++;
 			}
-			if(direction.equals(Direction.DOWN)) {
+			else if(direction.equals(Direction.DOWN)) {
 				y++;
 			}
 		}

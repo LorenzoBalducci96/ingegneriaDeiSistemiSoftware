@@ -20,7 +20,7 @@ import it.unibo.exploremap.stella.model.RobotState.Goal;
  
 
 public class aiutil {
-private static RobotState initialState;
+public static RobotState initialState;
 		
 /*
  * ------------------------------------------------
