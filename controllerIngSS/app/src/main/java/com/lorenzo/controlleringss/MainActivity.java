@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     Button stop;
     Button forward1Square;
     Button sparecchia;
+    Button apparecchia;
 
     ImageButton record;
     TextView insertedText;
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         stop = findViewById(R.id.stop);
         forward1Square = findViewById(R.id.forward1Square);
         sparecchia = findViewById(R.id.sparecchia);
+        apparecchia = findViewById(R.id.apparecchia);
 
         connection = new MqttConnection(this.getApplicationContext());
 
@@ -81,6 +83,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 connection.SendCommand("unibo/qak/events", "msg(userCmd,event,frontend,none,userCmd(h),14)");
+            }
+        });
+
+        sparecchia.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                connection.SendCommand("unibo/qak/events", "msg(maitreCmd,event,frontend,none,maitreCmd(v),10)");
             }
         });
 

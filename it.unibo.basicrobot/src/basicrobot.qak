@@ -59,12 +59,10 @@ QActor basicrobot context ctxBasicRobot {
 	State handleMaitreCmd{
 		onMsg( maitreCmd : maitreCmd(ACTION)){
 			run itunibo.robot.plannerBhestie.action("msg(${payloadArg(0)})")
-			run itunibo.robot.virtualRobotJavaState.updateState("msg(${payloadArg(0)})")
 			run itunibo.robot.virtualRobotJavaState.printState()
 		}
 		onMsg( plannerCmd : plannerCmd(X)){
 			run itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})" ) 
- 			run itunibo.robot.virtualRobotJavaState.updateState("msg(${payloadArg(0)})")
 			run itunibo.robot.virtualRobotJavaState.printState()
 		}
 	}

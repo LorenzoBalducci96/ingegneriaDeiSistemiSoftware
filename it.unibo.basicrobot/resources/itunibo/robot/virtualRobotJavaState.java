@@ -1,7 +1,9 @@
 package itunibo.robot;
 
+import it.unibo.exploremap.stella.model.RobotState.Direction;
+
 public class virtualRobotJavaState {
-	private static String orientation = "nord";
+	private static Direction direction = Direction.UP;
 	private static int x = 0;
 	private static int y = 0;
 	
@@ -13,64 +15,64 @@ public class virtualRobotJavaState {
 		return y;
 	}
 	
-	public static String getOrientation() {
-		return orientation;
+	public static Direction getDirection() {
+		return direction;
 	}
 	
 	public static void updateState(String cmd) {
 		if(cmd.equalsIgnoreCase("msg(i)")) {
-			if(orientation.equalsIgnoreCase("nord")) {
+			if(direction.equals(Direction.UP)) {
 				y++;
 			}
-			if(orientation.equalsIgnoreCase("est")) {
+			if(direction.equals(Direction.RIGHT)) {
 				x++;
 			}
-			if(orientation.equalsIgnoreCase("ovest")) {
+			if(direction.equals(Direction.LEFT)) {
 				x--;
 			}
-			if(orientation.equalsIgnoreCase("sud")) {
+			if(direction.equals(Direction.DOWN)) {
 				y--;
 			}
 		}
 		if(cmd.equalsIgnoreCase("msg(r)")) {
-			if(orientation.equalsIgnoreCase("nord")) {
-				orientation="est";
+			if(direction.equals(Direction.UP)) {
+				direction = Direction.RIGHT;
 			}
-			if(orientation.equalsIgnoreCase("est")) {
-				orientation="sud";
+			if(direction.equals(Direction.RIGHT)) {
+				direction = Direction.DOWN;
 			}
-			if(orientation.equalsIgnoreCase("ovest")) {
-				orientation="nord";
+			if(direction.equals(Direction.LEFT)) {
+				direction = Direction.UP;
 			}
-			if(orientation.equalsIgnoreCase("sud")) {
-				orientation="ovest";
+			if(direction.equals(Direction.DOWN)) {
+				direction = Direction.LEFT ;
 			}
 		}
 		if(cmd.equalsIgnoreCase("msg(l)")) {
-			if(orientation.equalsIgnoreCase("nord")) {
-				orientation="ovest";
+			if(direction.equals(Direction.UP)) {
+				direction = Direction.LEFT;
 			}
-			if(orientation.equalsIgnoreCase("est")) {
-				orientation="nord";
+			if(direction.equals(Direction.RIGHT)) {
+				direction = Direction.UP;
 			}
-			if(orientation.equalsIgnoreCase("ovest")) {
-				orientation="sud";
+			if(direction.equals(Direction.LEFT)) {
+				direction = Direction.DOWN;
 			}
-			if(orientation.equalsIgnoreCase("sud")) {
-				orientation="est";
+			if(direction.equals(Direction.DOWN)) {
+				direction = direction.RIGHT;
 			}
 		}
 		if(cmd.equalsIgnoreCase("msg(k)")) {
-			if(orientation.equalsIgnoreCase("nord")) {
+			if(direction.equals(Direction.UP)) {
 				y--;
 			}
-			if(orientation.equalsIgnoreCase("est")) {
+			if(direction.equals(Direction.RIGHT)) {
 				x--;
 			}
-			if(orientation.equalsIgnoreCase("ovest")) {
+			if(direction.equals(Direction.LEFT)) {
 				x++;
 			}
-			if(orientation.equalsIgnoreCase("sud")) {
+			if(direction.equals(Direction.DOWN)) {
 				y++;
 			}
 		}

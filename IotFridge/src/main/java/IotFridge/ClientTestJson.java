@@ -29,7 +29,7 @@ public class ClientTestJson {
 		InetAddress IPAddress = InetAddress.getByName("localhost");
 		Comunication_Message message = new Comunication_Message(TYPE.TYPE_REQUEST_FOOD_LIST, "182,1"); //Codice,quanti SENZA SPAZI ne altro
 		System.out.println("Converting Comunication_Message into GSON: " + message);
-		String finalGson = gson.toJson(message);
+		String finalGson = Gson.toJson(message);
 		System.out.println("Final converted message: " + finalGson);
 		sendData = finalGson.getBytes();
 		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 9876);
