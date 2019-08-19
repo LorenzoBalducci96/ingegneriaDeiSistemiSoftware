@@ -76,9 +76,10 @@ dependencies {
     compile name: 'labbaseRobotSam'
 	compile name: 'pi4j-core' //2-12 SNAPSHOT non in gradle
  	//PLANNER
-    //compile name: 'it.unibo.planner'
+    compile name: 'it.unibo.planner'
  	// https://mvnrepository.com/artifact/com.googlecode.aima-java/aima-core
 	compile group: 'com.googlecode.aima-java', name: 'aima-core', version: '3.0.0'
+	
 }
 
 compileKotlin {
@@ -97,14 +98,14 @@ sourceSets {
 
 jar {
     println("executing jar nuovo")
+    from sourceSets.main.allSource
     manifest {
         attributes 'Main-Class': "it.unibo.basicrobot.BasicrobotKt"
     }
 }
 
+//mainClassName = 'it.unibo.TODOKt'
 /*
-mainClassName = 'it.unibo.TODOKt'
-
 jar {
     println("executing jar")
     from sourceSets.main.allSource

@@ -62,7 +62,7 @@ dependencies {
 	//ROBOT nano (SAM)
     compile fileTree(dir: 'C:/Didattica2018Work/iss2019Lab/libs',  include: 'labbaseRobotSam.jar')
 	compile fileTree(dir: 'C:/Didattica2018Work/iss2019Lab/libs',  include: 'pi4j-core.jar') //2-12 SNAPSHOT non in gradle
-
+	compile group: 'com.googlecode.aima-java', name: 'aima-core', version: '3.0.0'
 }
 
 compileKotlin {
