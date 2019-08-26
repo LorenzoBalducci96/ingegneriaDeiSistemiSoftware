@@ -5,6 +5,7 @@ mqttBroker "localhost" : 1883    //192.168.1.18  192.168.43.229 192.168.137.1
 Event  userCmd      : userCmd(X)	//from GUI X = w | a | s | d | h 
 Event  maitreCmd	: maitreCmd(X)
 Event  plannerCmd	: plannerCmd(X)
+Event  ackMsg		: ackMsg(X)
 Event endTaskEventCmd : endTaskEventCmd(X)
 Event  sonar        : sonar(SONAR, DISTANCE)	 //from sonar in the robot environment   
 Event  sonarRobot   : sonar( DISTANCE )	         //from  sonar on robot 
@@ -14,7 +15,8 @@ Dispatch robotCmd   : robotCmd( CMD )
 
 Context ctxBasicRobot ip [host="localhost" port=8005]   -mqtt
    
-QActor basicrobot context ctxBasicRobot {	   
+QActor basicrobot context ctxBasicRobot {	 
+	["var obstacle = false"]  
 	State s0 initial {  
  		//run itunibo.streams.sonarStreamPipe.create( myself ) //A stream pipe  
   		solve( consult("basicRobotConfig.pl") )   
@@ -27,11 +29,11 @@ QActor basicrobot context ctxBasicRobot {
    		}
    		
    		//erano commentati
-   		run itunibo.robot.robotSupport.move( "msg(a)" )
-   		delay 700
-   		run itunibo.robot.robotSupport.move( "msg(d)" )
-   		delay 700
-   		run itunibo.robot.robotSupport.move( "msg(h)" )
+   		//run itunibo.robot.robotSupport.move( "msg(a)" )
+   		//delay 700
+   		//run itunibo.robot.robotSupport.move( "msg(d)" )
+   		//delay 700
+   		//run itunibo.robot.robotSupport.move( "msg(h)" )
    		//fine erano commentati
  	}  
 	Goto waitCmd   
@@ -53,18 +55,49 @@ QActor basicrobot context ctxBasicRobot {
 	Goto waitCmd
 	
 	State handleMaitreCmd{
+		println("I'M IN HANDLEMAITRECMD STATE")
 		onMsg( maitreCmd : maitreCmd(ACTION)){
+			println("I'M EXECUTING ACTION FROM HANDLEMAITRECMD")
 			run itunibo.robot.plannerBhestie.action("msg(${payloadArg(0)})")
-			//run itunibo.robot.virtualRobotJavaState.printState()
-		}
-		onMsg( plannerCmd : plannerCmd(X)){
-			run itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})" ) 
+			run itunibo.robot.plannerBhestie.requestNextMove()
 			//run itunibo.robot.virtualRobotJavaState.printState()
 		}
 	}
-	Transition t0 whenEvent	plannerCmd -> handleMaitreCmd
-	whenEvent userCmd -> stopped
+	Transition t0 whenEvent plannerCmd -> progressPlanner
+	
+	State progressPlanner{
+		println("I'M IN PROGRESS PLANNER STATE")
+		onMsg( plannerCmd : plannerCmd(X)){
+			run itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})" )
+			//run itunibo.robot.virtualRobotJavaState.printState()
+			run itunibo.robot.robotSupport.waitAck()
+		}
+		onMsg( ackMsg : ackMsg(X)){
+			run itunibo.robot.plannerBhestie.registerAck("${payloadArg(0)}")
+			run itunibo.robot.plannerBhestie.requestNextMove()
+		}
+	}
+	Transition t0 whenEvent userCmd -> stopped
+	whenEvent plannerCmd -> progressPlanner
+	whenEvent ackMsg -> progressPlanner
 	whenEvent endTaskEventCmd -> waitCmd
+	/*whenEvent	plannerCmd -> waitAck*/
+	
+	
+	/*
+	State waitAck {
+		println("I'M IN WAITACK STATE")
+		run itunibo.robot.robotSupport.waitAck()
+		onMsg( ackMsg : ackMsg(X)){
+			run itunibo.robot.plannerBhestie.registerAck("msg(${payloadArg(0)})")
+		}
+	}
+	Goto progressPlanner
+	*/
+	
+	State handeObstacle {
+		println("nothing implemented for progress planner after obstacle")
+	}
 	
 	
 	State stopped{}

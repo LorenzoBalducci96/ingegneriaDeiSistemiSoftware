@@ -3,6 +3,8 @@
 #include <SoftwareSerial.h>
 #include <MeMCore.h>
 
+/*INFO: full mbor robot square 17cm*/
+
 MeDCMotor motor_9(9);
 MeDCMotor motor_10(10);
 double angle_rad = PI/180.0;
@@ -15,6 +17,13 @@ int count;
 MeUltrasonicSensor ultrasonic_3(3);
 MeRGBLed rgbled_7(7, 7==7?2:4);
 void remoteCmdExecutor();
+
+float forward_1_square_time = 0.7;
+float rotate_time = 0.555; 
+float forwarded_time = 0;
+float rotated_time = 0;
+int intervals_on_forwarding_squares = 10;
+float minimum_cm_for_blocking_robot = 3;
 
 
 /*
@@ -106,8 +115,8 @@ void remoteCmdExecutor()
         input = Serial.read();
         //Serial.println(input);
         switch( input ){
-          case 119 : move(1,150); break;  //w
-          case 115 : move(2,150); break;  //s
+          case 119 : move(2,150); break;  //w
+          case 115 : move(1,150); break;  //s
           case 97  : move(3,150); break;  //a
           case 100 : move(4,150); break;  //d
           case 104 : move(1,0); stopFollow = true;  break;  //h
@@ -124,20 +133,43 @@ void remoteCmdExecutor()
 void rotateLeft90()
 {
   move(3,150);
-  _delay( 0.555 );
+  _delay( rotate_time );
   move(1,0);
+  Serial.println("ok");
 }
 void rotateRight90()
-{Serial.println("rotateRight90");
+{//Serial.println("rotateRight90");
   move(4,150);
-  _delay( 0.555 );
+  _delay( rotate_time );
   move(1,0);
+  Serial.println("ok");
 }
 void foward1Square(){
-  Serial.println("rotateRight90");
-  move(2,150);
-  _delay( 0.555 );
-  move(1,0);
+  sonar = ultrasonic_3.distanceCm();
+  if(sonar < 17)
+    Serial.println("fail");
+  else{
+    forwarded_time = 0;
+    float forward_interval_time = forward_1_square_time/intervals_on_forwarding_squares;
+    move(1,150);
+    bool ok_situation = true;
+    while(forwarded_time < intervals_on_forwarding_squares && ok_situation){
+      _delay( forward_interval_time );
+      forwarded_time++;
+      sonar = ultrasonic_3.distanceCm();
+      if(sonar < minimum_cm_for_blocking_robot){
+        ok_situation = 0;
+        //return backward
+        move(2,150);
+        _delay(forwarded_time * forward_interval_time);
+      }
+    }
+    move(1,0);
+    if(ok_situation == true)
+      Serial.println("ok");
+    else
+      Serial.println("fail");
+  }
 }
 
 /*
@@ -204,7 +236,7 @@ void loop(){
     rgbled_7.setColor(0,0,60,0);
     rgbled_7.show();
     remoteCmdExecutor();
-    lookAtSonar();
+    //lookAtSonar();
     //lineFollow();
     delay(200);
 }

@@ -25,4 +25,14 @@ object robotSupport{
 		}
 	}
 	
+	fun waitAck(){ //cmd = msg(M) M=w | a | s | d | h
+		println("robotSupport waitAck" )
+		when( robotKind ){
+			"virtual"  -> { println("not implemented yet, program interrupted" ) }
+			"realmbot" -> { itunibo.robotMbot.mbotSupport.waitAck( ) }
+			"realnano" -> { println("not implemented yet, program interrupted" ) }
+			else       -> println( "robot unknown" )
+		}
+	}
+	
 }

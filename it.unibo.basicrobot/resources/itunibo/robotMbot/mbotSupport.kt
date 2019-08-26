@@ -29,6 +29,17 @@ object mbotSupport{
 		}
 	}
 	
+	fun waitAck(){
+		GlobalScope.launch {
+			var ack = conn.receiveALine();
+			println("received ack:" + ack)
+			if(ack.trim().equals("ok", true))
+				actor.autoMsg("ackMsg", "ackMsg(ok)")
+			else if(ack.trim().equals("fail", true))
+				actor.autoMsg("ackMsg", "ackMsg(fail)")
+		}
+	}
+	
 	private fun initConn( port : String ){
 		try {
 			println("mbotSupport initConn starts")
@@ -44,7 +55,7 @@ object mbotSupport{
 				println("mbotSupport initConn received: $curDataFromArduino istart=$istart "   )
 				if( istart ) break
 			}
-			getDataFromArduino();
+			//getDataFromArduino();
 		}catch(  e : Exception) {
 			println("mbotSupport ERROR ${e }"   );
 		}		

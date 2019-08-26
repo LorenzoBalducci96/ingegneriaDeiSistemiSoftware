@@ -15,6 +15,9 @@ import it.unibo.exploremap.stella.model.RobotState
 
 object plannerBhestie{
 	lateinit var actor: ActorBasic
+	lateinit private var actions: MutableList<Action>
+	lateinit private var goals_step: MutableList<Goal>
+	lateinit private var move_to_register: Action
 	
 	fun create( actor: ActorBasic ){
 		this.actor = actor
@@ -27,6 +30,69 @@ object plannerBhestie{
 		aiutil.initAI();
 	}
 	
+	fun registerAck(cmd : String){
+		if(cmd.equals("ok", true)){
+			aiutil.doMove(move_to_register.toString())
+			aiutil.showMap();
+		}
+		if(cmd.equals("fail", true)){
+			when(aiutil.initialState.getDirection()){
+				Direction.UP -> RoomMap.getRoomMap().put(aiutil.initialState.getX(), aiutil.initialState.getY() - 1, Box.createObstacle())
+				Direction.DOWN -> RoomMap.getRoomMap().put(aiutil.initialState.getX(), aiutil.initialState.getY() + 1, Box.createObstacle())
+				Direction.RIGHT -> RoomMap.getRoomMap().put(aiutil.initialState.getX() + 1, aiutil.initialState.getY(), Box.createObstacle())
+				Direction.LEFT -> RoomMap.getRoomMap().put(aiutil.initialState.getX() - 1, aiutil.initialState.getY(), Box.createObstacle())
+			}
+			aiutil.showMap();
+			aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0));
+			actions = aiutil.doPlan()
+		}
+	}
+	
+	fun requestNextMove(){
+		GlobalScope.launch {
+			if(actions.isEmpty()){
+				goals_step.removeAt(0);
+				if(goals_step.isEmpty()){
+					actor.autoMsg("endTaskEventCmd", "endTaskEventCmd(GOAL)")
+				}
+				else{
+					aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0));
+					actions = aiutil.doPlan()
+					move_to_register = actions.removeAt(0);
+					when (move_to_register.toString()) {
+					    "w" -> actor.autoMsg("plannerCmd", "plannerCmd(i)")
+					    "a" -> actor.autoMsg("plannerCmd", "plannerCmd(l)")
+						"s" -> actor.autoMsg("plannerCmd", "plannerCmd(h)")
+						"d" -> actor.autoMsg("plannerCmd", "plannerCmd(r)")
+					}
+				}
+			}
+			else{//TODO fattorizzare codice
+				move_to_register = actions.removeAt(0);
+					when (move_to_register.toString()) {
+					    "w" -> actor.autoMsg("plannerCmd", "plannerCmd(i)")
+					    "a" -> actor.autoMsg("plannerCmd", "plannerCmd(l)")
+						"s" -> actor.autoMsg("plannerCmd", "plannerCmd(h)")
+						"d" -> actor.autoMsg("plannerCmd", "plannerCmd(r)")
+					}
+			}
+		}	
+	}
+	
+	
+	fun action (cmd : String){
+		if(cmd.equals("msg(c)", true)){//sparecchia
+			goals_step = mutableListOf(Goal.TABLE, Goal.DISHWASHER)
+			aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0));//prendo i piatti
+			actions = aiutil.doPlan()
+			aiutil.showMap();
+			
+			//----------------------------------
+		}
+	}
+	
+	
+	/*
 	fun action (cmd : String){
 		GlobalScope.launch {
 			if(cmd.equals("msg(c)", true)){//sparecchia
@@ -44,7 +110,6 @@ object plannerBhestie{
 						"s" -> actor.autoMsg("plannerCmd", "plannerCmd(h)")
 						"d" -> actor.autoMsg("plannerCmd", "plannerCmd(r)")
 					}
-					
 				}
 				
 				println("il robot è arrivato al tavolo e prende i piatti sporchi")
@@ -108,4 +173,5 @@ object plannerBhestie{
 			
 		}
 	}
+ */
 }

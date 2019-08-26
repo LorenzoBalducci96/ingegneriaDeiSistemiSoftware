@@ -15,6 +15,7 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 	}
 		
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		var obstacle = false
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -28,11 +29,6 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 						if(currentSolution.isSuccess()) { itunibo.robot.robotSupport.create(myself ,getCurSol("R").toString(), getCurSol("PORT").toString() )
 						itunibo.robot.plannerBhestie.create(myself)
 						 }
-						itunibo.robot.robotSupport.move( "msg(a)"  )
-						delay(700) 
-						itunibo.robot.robotSupport.move( "msg(d)"  )
-						delay(700) 
-						itunibo.robot.robotSupport.move( "msg(h)"  )
 					}
 					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
 				}	 
@@ -59,23 +55,44 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 				}	 
 				state("handleMaitreCmd") { //this:State
 					action { //it:State
+						println("I'M IN HANDLEMAITRECMD STATE")
 						if( checkMsgContent( Term.createTerm("maitreCmd(X)"), Term.createTerm("maitreCmd(ACTION)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
+								println("I'M EXECUTING ACTION FROM HANDLEMAITRECMD")
 								itunibo.robot.plannerBhestie.action( "msg(${payloadArg(0)})"  )
+								itunibo.robot.plannerBhestie.requestNextMove(  )
 						}
+					}
+					 transition(edgeName="t03",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
+				}	 
+				state("progressPlanner") { //this:State
+					action { //it:State
+						println("I'M IN PROGRESS PLANNER STATE")
 						if( checkMsgContent( Term.createTerm("plannerCmd(X)"), Term.createTerm("plannerCmd(X)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})"  )
+								itunibo.robot.robotSupport.waitAck(  )
+						}
+						if( checkMsgContent( Term.createTerm("ackMsg(X)"), Term.createTerm("ackMsg(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								itunibo.robot.plannerBhestie.registerAck( "${payloadArg(0)}"  )
+								itunibo.robot.plannerBhestie.requestNextMove(  )
 						}
 					}
-					 transition(edgeName="t03",targetState="handleMaitreCmd",cond=whenEvent("plannerCmd"))
-					transition(edgeName="t04",targetState="stopped",cond=whenEvent("userCmd"))
-					transition(edgeName="t05",targetState="waitCmd",cond=whenEvent("endTaskEventCmd"))
+					 transition(edgeName="t04",targetState="stopped",cond=whenEvent("userCmd"))
+					transition(edgeName="t05",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
+					transition(edgeName="t06",targetState="progressPlanner",cond=whenEvent("ackMsg"))
+					transition(edgeName="t07",targetState="waitCmd",cond=whenEvent("endTaskEventCmd"))
+				}	 
+				state("handeObstacle") { //this:State
+					action { //it:State
+						println("nothing implemented for progress planner after obstacle")
+					}
 				}	 
 				state("stopped") { //this:State
 					action { //it:State
 					}
-					 transition(edgeName="t06",targetState="handleMaitreCmd",cond=whenEvent("userCmd"))
+					 transition(edgeName="t08",targetState="handleMaitreCmd",cond=whenEvent("userCmd"))
 				}	 
 			}
 		}
