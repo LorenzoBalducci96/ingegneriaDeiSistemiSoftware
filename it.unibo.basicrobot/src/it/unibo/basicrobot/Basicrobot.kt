@@ -27,6 +27,7 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 						 }
 						if(currentSolution.isSuccess()) { itunibo.robot.robotSupport.create(myself ,getCurSol("R").toString(), getCurSol("PORT").toString() )
 						itunibo.robot.plannerBhestie.create(myself)
+						itunibo.comunicationMessageClient.comunicationMessageClient.init(myself)
 						 }
 					}
 					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
@@ -37,6 +38,29 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 					 transition(edgeName="t00",targetState="handleUserCmd",cond=whenEvent("userCmd"))
 					transition(edgeName="t01",targetState="handleUserCmd",cond=whenDispatch("robotCmd"))
 					transition(edgeName="t02",targetState="handleMaitreCmd",cond=whenEvent("maitreCmd"))
+					transition(edgeName="t03",targetState="handleFridgeRequest",cond=whenEvent("fridgeRequest"))
+					transition(edgeName="t04",targetState="handleRecvFoodMsgEvent",cond=whenEvent("recvFoodMsgEvent"))
+				}	 
+				state("handleFridgeRequest") { //this:State
+					action { //it:State
+						println("I'M IN HANDLEFRIDGEREQUEST STATE")
+						if( checkMsgContent( Term.createTerm("fridgeRequest(X)"), Term.createTerm("fridgeRequest(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								itunibo.comunicationMessageClient.comunicationMessageClient.requestFoodList( "msg(${payloadArg(0)})"  )
+						}
+					}
+					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
+				}	 
+				state("handleRecvFoodMsgEvent") { //this:State
+					action { //it:State
+						println("I'M IN HANDLERECVFOODMSGEVENT STATE")
+						if( checkMsgContent( Term.createTerm("recvFoodMsgEvent(X)"), Term.createTerm("recvFoodMsgEvent(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								emit("recvFoodMsgEvent", "recvFoodMsgEvent(${payloadArg(0)})" ) 
+								itunibo.comunicationMessageClient.comunicationMessageClient.requestFoodList( "msg(${payloadArg(0)})"  )
+						}
+					}
+					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
 				}	 
 				state("handleUserCmd") { //this:State
 					action { //it:State
@@ -62,7 +86,7 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 								itunibo.robot.plannerBhestie.requestNextMove(  )
 						}
 					}
-					 transition(edgeName="t03",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
+					 transition(edgeName="t05",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
 				}	 
 				state("progressPlanner") { //this:State
 					action { //it:State
@@ -78,21 +102,21 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 								itunibo.robot.plannerBhestie.requestNextMove(  )
 						}
 					}
-					 transition(edgeName="t04",targetState="stopped",cond=whenEvent("alarm"))
-					transition(edgeName="t05",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
-					transition(edgeName="t06",targetState="progressPlanner",cond=whenEvent("ackMsg"))
-					transition(edgeName="t07",targetState="waitCmd",cond=whenEvent("endTaskEventCmd"))
+					 transition(edgeName="t06",targetState="stopped",cond=whenEvent("alarm"))
+					transition(edgeName="t07",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
+					transition(edgeName="t08",targetState="progressPlanner",cond=whenEvent("ackMsg"))
+					transition(edgeName="t09",targetState="waitCmd",cond=whenEvent("endTaskEventCmd"))
 				}	 
 				state("stopped") { //this:State
 					action { //it:State
 					}
-					 transition(edgeName="t08",targetState="resuming",cond=whenEvent("situationUnderControl"))
+					 transition(edgeName="t010",targetState="resuming",cond=whenEvent("situationUnderControl"))
 				}	 
 				state("resuming") { //this:State
 					action { //it:State
 						itunibo.robot.plannerBhestie.requestNextMove(  )
 					}
-					 transition(edgeName="t09",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
+					 transition(edgeName="t011",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
 				}	 
 			}
 		}
