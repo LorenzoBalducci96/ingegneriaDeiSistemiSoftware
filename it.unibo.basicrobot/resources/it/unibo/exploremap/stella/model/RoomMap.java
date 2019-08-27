@@ -1,13 +1,17 @@
 package it.unibo.exploremap.stella.model;
 
 public class RoomMap {
-	private final static int ROOMSIZE = 5;
+	private static int ROOMSIZE = 7;
 	private static RoomMap singletonRoomMap;
 
 	public static RoomMap getRoomMap() {
 		if (singletonRoomMap == null)
 			singletonRoomMap = new RoomMap();
 		return singletonRoomMap;
+	}
+	
+	public static void setRoomSize(int roomSize) {
+		ROOMSIZE = roomSize;
 	}
 
 	public static int getRoomsize() {
@@ -283,7 +287,7 @@ public class RoomMap {
 		StringBuilder builder = new StringBuilder();
 		Box box;
 
-		for(int i = 0; i < ROOMSIZE; i++) {
+		for(int i = ROOMSIZE - 1; i >= 0; i--) {
 			for(int j = 0; j < ROOMSIZE; j++) {
 				box = roomMap[i][j];
 				if (box == null)

@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     ImageButton record;
     TextView insertedText;
 
+    boolean must_stop = true;
+
     static int requestCode = 100;
 
     MqttConnection connection;
@@ -82,14 +84,34 @@ public class MainActivity extends AppCompatActivity {
         stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                connection.SendCommand("unibo/qak/events", "msg(userCmd,event,frontend,none,userCmd(h),14)");
+                if(must_stop) {
+                    must_stop = false;
+                    connection.SendCommand("unibo/qak/events", "msg(alarm,event,frontend,none,alarm(h),14)");
+                }else{
+                    must_stop = true;
+                    connection.SendCommand("unibo/qak/events", "msg(situationUnderControl,event,frontend,none,situationUnderControl(h),14)");
+                }
             }
         });
 
-        sparecchia.setOnClickListener(new View.OnClickListener() {
+        apparecchia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 connection.SendCommand("unibo/qak/events", "msg(maitreCmd,event,frontend,none,maitreCmd(v),10)");
+            }
+        });
+
+        right.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                connection.SendCommand("unibo/qak/events", "msg(userCmd,event,frontend,none,userCmd(r),10)");
+            }
+        });
+
+        left.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                connection.SendCommand("unibo/qak/events", "msg(userCmd,event,frontend,none,userCmd(l),10)");
             }
         });
 
@@ -148,26 +170,5 @@ public class MainActivity extends AppCompatActivity {
                     }
             }
     }
-
-    private void moveForward(){
-
-    }
-
-    private void moveBackward(){
-
-    }
-
-    private void rotatingRight(){
-
-    }
-
-    private void rotatingLeft(){
-
-    }
-
-    private void stop(){
-
-    }
-
 }
 

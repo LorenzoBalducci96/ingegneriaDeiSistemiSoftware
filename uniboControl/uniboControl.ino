@@ -22,7 +22,7 @@ float forward_1_square_time = 0.7;
 float rotate_time = 0.555; 
 float forwarded_time = 0;
 float rotated_time = 0;
-int intervals_on_forwarding_squares = 10;
+int intervals_on_forwarding_squares = 20;
 float minimum_cm_for_blocking_robot = 3;
 
 

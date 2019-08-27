@@ -19,13 +19,28 @@ object plannerBhestie{
 	lateinit private var goals_step: MutableList<Goal>
 	lateinit private var move_to_register: Action
 	
-	fun create( actor: ActorBasic ){
-		this.actor = actor
+	fun create( actor: ActorBasic/*, PANTRY_X: String, PANTRY_Y: String,
+   				TABLE_X: String, TABLE_Y: String,
+   				DISHWASHER_X: String, DISHWASHER_Y: String,
+   				FRIDGE_X: String, FRIDGE_Y: String*/){
 		
-		RoomMap.getRoomMap().put(2,2,Box.createTable());
-		RoomMap.getRoomMap().put(4,4,Box.createDishwasher());
-		RoomMap.getRoomMap().put(0,4,Box.createFridge());
-		RoomMap.getRoomMap().put(4,0,Box.createPantry());
+		
+		
+		this.actor = actor
+
+		var TABLE_X: String = "2";
+		var TABLE_Y: String = "2";
+		var DISHWASHER_X: String = "4";
+		var DISHWASHER_Y: String = "4";
+		var FRIDGE_X: String = "0";
+		var FRIDGE_Y: String = "2";
+		var PANTRY_X: String = "4";
+		var PANTRY_Y: String = "0";
+		
+		RoomMap.getRoomMap().put(Integer.parseInt(TABLE_X),Integer.parseInt(TABLE_Y),Box.createTable());
+		RoomMap.getRoomMap().put(Integer.parseInt(DISHWASHER_X),Integer.parseInt(DISHWASHER_Y),Box.createDishwasher());
+		RoomMap.getRoomMap().put(Integer.parseInt(FRIDGE_X),Integer.parseInt(FRIDGE_Y),Box.createFridge());
+		RoomMap.getRoomMap().put(Integer.parseInt(PANTRY_X),Integer.parseInt(PANTRY_Y),Box.createPantry());
 		
 		aiutil.initAI();
 	}

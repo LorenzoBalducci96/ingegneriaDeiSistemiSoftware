@@ -15,7 +15,6 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 	}
 		
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		var obstacle = false
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -79,20 +78,21 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 								itunibo.robot.plannerBhestie.requestNextMove(  )
 						}
 					}
-					 transition(edgeName="t04",targetState="stopped",cond=whenEvent("userCmd"))
+					 transition(edgeName="t04",targetState="stopped",cond=whenEvent("alarm"))
 					transition(edgeName="t05",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
 					transition(edgeName="t06",targetState="progressPlanner",cond=whenEvent("ackMsg"))
 					transition(edgeName="t07",targetState="waitCmd",cond=whenEvent("endTaskEventCmd"))
 				}	 
-				state("handeObstacle") { //this:State
-					action { //it:State
-						println("nothing implemented for progress planner after obstacle")
-					}
-				}	 
 				state("stopped") { //this:State
 					action { //it:State
 					}
-					 transition(edgeName="t08",targetState="handleMaitreCmd",cond=whenEvent("userCmd"))
+					 transition(edgeName="t08",targetState="resuming",cond=whenEvent("situationUnderControl"))
+				}	 
+				state("resuming") { //this:State
+					action { //it:State
+						itunibo.robot.plannerBhestie.requestNextMove(  )
+					}
+					 transition(edgeName="t09",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
 				}	 
 			}
 		}
