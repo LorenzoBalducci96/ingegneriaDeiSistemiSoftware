@@ -27,7 +27,7 @@ object comunicationMessageClient {
     private var ipAddr: InetAddress? = null
     private var port: Int = 0
     private var actor: ActorBasic? = null
-	private var receivedComunicationMessage: Comunication_Message? = null
+	//private var receivedComunicationMessage: Comunication_Message? = null
 
 
     fun init(actor: ActorBasic) {
@@ -37,7 +37,7 @@ object comunicationMessageClient {
             comunicationMessageClient.sendData = ByteArray(1024)
             comunicationMessageClient.recvData = ByteArray(1024)
 
-            ipAddr = InetAddress.getByName("192.168.137.10")
+            ipAddr = InetAddress.getByName("localhost")
             port = 9876
 
         } catch (e: SocketException) {
@@ -52,10 +52,11 @@ object comunicationMessageClient {
 
     fun requestFoodList(cmd: String) {
 		GlobalScope.launch {
-	        if (cmd.equals("t", ignoreCase = true)) {
+			println(cmd)
+	        if (cmd.equals("msg(l)", ignoreCase = true)) {
 	            var gson: Gson = Gson();
 	            var message: Comunication_Message = Comunication_Message(TYPE.TYPE_REQUEST_FOOD_LIST, "");
-	            val messageGson = ""//gson.toJson(message);
+	            val messageGson = gson.toJson(message);
 	            sendData = messageGson.toByteArray()
 	            try {
 	                clientSocket!!.send(DatagramPacket(sendData!!, sendData!!.size, ipAddr, port))
@@ -74,8 +75,12 @@ object comunicationMessageClient {
 				var comunicationMessage: Comunication_Message =
 					gson.fromJson(reader, Comunication_Message::class.java)
 				
-				receivedComunicationMessage = comunicationMessage
-				actor!!.autoMsg("recvFoodMsgEvent", "recvFoodMsgEvent(X)")
+				//receivedComunicationMessage = comunicationMessage
+				var prova: String = "recvFoodMsgEvent(" + comunicationMessage.toString() + ")";
+				println(prova)
+				
+				//actor!!.autoMsg("recvFoodMsgEvent", "recvFoodMsgEvent(ok)")
+				actor!!.autoMsg("recvFoodMsgEvent", "recvFoodMsgEvent(\"Tipo TYPE_RESPONSE_FOOD_LIST Payload 123,4,piatto di melanzane;182,10,salmone alla griglia;188,7,patatine arrosto\")")     
 	        }
 		}
     }

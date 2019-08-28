@@ -7,13 +7,13 @@ Event  maitreCmd	: maitreCmd(X)
 Event  plannerCmd	: plannerCmd(X)
 Event  ackMsg		: ackMsg(X)
 Event  fridgeRequest : fridgeRequest(X)
-Event  recvFoodMsgEvent: recvFoodMsgEvent(X)
+Event  recvFoodMsgEvent : recvFoodMsgEvent(X)
 Event  endTaskEventCmd : endTaskEventCmd(X)
 Event  alarm		: alarm(X)
 Event  situationUnderControl	: situationUnderControl(X)
 Event  sonar        : sonar(SONAR, DISTANCE)	 //from sonar in the robot environment   
 Event  sonarRobot   : sonar( DISTANCE )	         //from  sonar on robot 
-Event  polar        : p( Distance, Angle )            
+Event  polar        : p( Distance, Angle )          
  
 Dispatch robotCmd   : robotCmd( CMD )
 
@@ -92,9 +92,9 @@ QActor basicrobot context ctxBasicRobot {
 		println("I'M IN HANDLERECVFOODMSGEVENT STATE")
 		onMsg( recvFoodMsgEvent : recvFoodMsgEvent(X)){
 			emit recvFoodMsgEvent : recvFoodMsgEvent($payloadArg(0))
-			run itunibo.comunicationMessageClient.comunicationMessageClient.requestFoodList("msg(${payloadArg(0)})")
 		}
 	}
+	
 	Goto waitCmd
 	
 	

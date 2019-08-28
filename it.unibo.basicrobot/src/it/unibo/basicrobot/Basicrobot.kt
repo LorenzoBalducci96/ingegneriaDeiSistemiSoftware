@@ -57,7 +57,6 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 						if( checkMsgContent( Term.createTerm("recvFoodMsgEvent(X)"), Term.createTerm("recvFoodMsgEvent(X)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								emit("recvFoodMsgEvent", "recvFoodMsgEvent(${payloadArg(0)})" ) 
-								itunibo.comunicationMessageClient.comunicationMessageClient.requestFoodList( "msg(${payloadArg(0)})"  )
 						}
 					}
 					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )

@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     Button forward1Square;
     Button sparecchia;
     Button apparecchia;
+    Button fridgeRequest;
 
     ImageButton record;
     TextView insertedText;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
         forward1Square = findViewById(R.id.forward1Square);
         sparecchia = findViewById(R.id.sparecchia);
         apparecchia = findViewById(R.id.apparecchia);
+        fridgeRequest = findViewById(R.id.fridgeRequest);
 
         connection = new MqttConnection(this.getApplicationContext());
 
@@ -100,6 +102,14 @@ public class MainActivity extends AppCompatActivity {
                 connection.SendCommand("unibo/qak/events", "msg(maitreCmd,event,frontend,none,maitreCmd(v),10)");
             }
         });
+
+        fridgeRequest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                connection.SendCommand("unibo/qak/events", "msg(fridgeRequest,event,frontend,none,fridgeRequest(l),10)");
+            }
+        });
+
 
         right.setOnClickListener(new View.OnClickListener() {
             @Override
