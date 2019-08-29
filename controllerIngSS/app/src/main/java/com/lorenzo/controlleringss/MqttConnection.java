@@ -2,9 +2,17 @@ package com.lorenzo.controlleringss;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.TextView;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+
+import java.util.StringTokenizer;
 
 public class MqttConnection {
 
@@ -12,15 +20,90 @@ public class MqttConnection {
 
     private MqttAndroidClient client;
     private String LOGTAG = "";
+    private TextView noticePanel;
 
-    public MqttConnection(Context context){
+    public MqttConnection(Context context, TextView noticePanel){
+        this.noticePanel = noticePanel;
         client = new MqttAndroidClient(
                 context, "tcp://192.168.43.72:1883", "smartphoneLorenzoBar");
         try{
-            client.connect();
+            client.connect(context, new IMqttActionListener() {
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                        try {
+                            client.subscribe("unibo/qak/events", 1);
+                        } catch (MqttException e) {
+                            e.printStackTrace();
+                        }
+                    Log.println(0, "", "ok");
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    Log.println(0, "", "failed connect");
+                }
+            });
+            client.setCallback(new MqttCallback() {
+                @Override
+                public void connectionLost(Throwable cause) {
+
+                }
+
+                @Override
+                public void messageArrived(String topic, MqttMessage message) throws Exception {
+                    notice(message.toString());
+                }
+
+                @Override
+                public void deliveryComplete(IMqttDeliveryToken token) {
+
+                }
+            });
         }catch(Exception e){
             e.printStackTrace();
             System.out.println("can't connect");
+        }
+    }
+
+    public void notice(String notice){
+        String payload = notice.split("(?<=Payload) ")[1];
+        StringTokenizer token = new StringTokenizer(payload);
+        payload = token.nextToken(")");
+        token = new StringTokenizer(payload);
+
+        String fullText = "";
+
+        StringTokenizer internalTokenizer = new StringTokenizer((token.nextToken(";")));
+        String foodCode = internalTokenizer.nextToken(",");
+        String qt = internalTokenizer.nextToken(",");
+        String description = internalTokenizer.nextToken(",");
+        fullText += foodCode + "  ";
+        fullText += qt + "  ";
+        fullText += description + "  ";
+        fullText += "\n";
+
+        String actualToken = "";
+        while(token.hasMoreTokens()){
+            internalTokenizer = new StringTokenizer(token.nextToken(";"));
+            foodCode = internalTokenizer.nextToken(",");
+            qt = internalTokenizer.nextToken(",");
+            description = internalTokenizer.nextToken(",");
+            fullText += foodCode + "  ";
+            fullText += qt + "  ";
+            fullText += description + "  ";
+
+            fullText += "\n";
+        }
+        noticePanel.setText(fullText);
+    }
+
+    public void subscribe(String topic){
+        if(client.isConnected()) {
+            try {
+                client.subscribe(topic, 1);
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
         }
     }
 

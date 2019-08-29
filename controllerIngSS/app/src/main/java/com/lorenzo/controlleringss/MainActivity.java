@@ -1,6 +1,7 @@
 package com.lorenzo.controlleringss;
 
 import android.content.Intent;
+import android.provider.SyncStateContract;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -9,11 +10,16 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -33,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     Button sparecchia;
     Button apparecchia;
     Button fridgeRequest;
+    TextView textScrollView;
 
     ImageButton record;
     TextView insertedText;
@@ -42,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
     static int requestCode = 100;
 
     MqttConnection connection;
+    MqttAndroidClient client;
+    private PahoMqttClient pahoMqttClient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +68,10 @@ public class MainActivity extends AppCompatActivity {
         sparecchia = findViewById(R.id.sparecchia);
         apparecchia = findViewById(R.id.apparecchia);
         fridgeRequest = findViewById(R.id.fridgeRequest);
+        textScrollView = findViewById(R.id.noticeView);
 
-        connection = new MqttConnection(this.getApplicationContext());
+        connection = new MqttConnection(this.getApplicationContext(), textScrollView);
+        connection.subscribe("unibo/qak/events");
 
         record = findViewById(R.id.record);
         insertedText = findViewById(R.id.inserted_text);
@@ -126,12 +138,39 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
-
         record.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 speak();
+            }
+        });
+    }
+
+    protected void mqttCallback() {
+        client.setCallback(new MqttCallback() {
+            @Override
+            public void connectionLost(Throwable cause) {
+                //msg("Connection lost...");
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage message) throws Exception {
+                TextView tvMessage = (TextView) findViewById(R.id.noticeView);
+                if(topic.equals("mycustomtopic1")) {
+                    //Add custom message handling here (if topic = "mycustomtopic1")
+                }
+                else if(topic.equals("mycustomtopic2")) {
+                    //Add custom message handling here (if topic = "mycustomtopic2")
+                }
+                else {
+                    String msg = "topic: " + topic + "\r\nMessage: " + message.toString() + "\r\n";
+                    tvMessage.append( msg);
+                }
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken token) {
+
             }
         });
     }

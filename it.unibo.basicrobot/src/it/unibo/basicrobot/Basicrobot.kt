@@ -15,6 +15,7 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 	}
 		
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		var ok_take_food = true
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -82,10 +83,34 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								println("I'M EXECUTING ACTION FROM HANDLEMAITRECMD")
 								itunibo.robot.plannerBhestie.action( "msg(${payloadArg(0)})"  )
+						}
+					}
+					 transition( edgeName="goto",targetState="waitingPlannerDecision", cond=doswitch() )
+				}	 
+				state("waitingPlannerDecision") { //this:State
+					action { //it:State
+						println("I'M IN WAITING PLANNER DECISION")
+						if( checkMsgContent( Term.createTerm("fridgeRequest(X)"), Term.createTerm("fridgeRequest(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								println("RECEIVED FRIDGE REQUEST")
+								itunibo.comunicationMessageClient.comunicationMessageClient.requestFoodList( "msg(${payloadArg(0)})"  )
+						}
+						if( checkMsgContent( Term.createTerm("recvFoodMsgEvent(X)"), Term.createTerm("recvFoodMsgEvent(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								println("RECEIVED FOODMSGEVENT")
+								itunibo.robot.plannerBhestie.evaluate_food_availability( "msg(${payloadArg(0)})"  )
+						}
+						if( checkMsgContent( Term.createTerm("foodAvailable(X)"), Term.createTerm("foodAvailable(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								println("RECEIVED FOOD AVAILABLE")
 								itunibo.robot.plannerBhestie.requestNextMove(  )
 						}
 					}
-					 transition(edgeName="t05",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
+					 transition(edgeName="t05",targetState="waitCmd",cond=whenEvent("foodUnavailable"))
+					transition(edgeName="t06",targetState="waitingPlannerDecision",cond=whenEvent("fridgeRequest"))
+					transition(edgeName="t07",targetState="waitingPlannerDecision",cond=whenEvent("recvFoodMsgEvent"))
+					transition(edgeName="t08",targetState="waitingPlannerDecision",cond=whenEvent("foodAvailable"))
+					transition(edgeName="t09",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
 				}	 
 				state("progressPlanner") { //this:State
 					action { //it:State
@@ -101,21 +126,21 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 								itunibo.robot.plannerBhestie.requestNextMove(  )
 						}
 					}
-					 transition(edgeName="t06",targetState="stopped",cond=whenEvent("alarm"))
-					transition(edgeName="t07",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
-					transition(edgeName="t08",targetState="progressPlanner",cond=whenEvent("ackMsg"))
-					transition(edgeName="t09",targetState="waitCmd",cond=whenEvent("endTaskEventCmd"))
+					 transition(edgeName="t010",targetState="stopped",cond=whenEvent("alarm"))
+					transition(edgeName="t011",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
+					transition(edgeName="t012",targetState="progressPlanner",cond=whenEvent("ackMsg"))
+					transition(edgeName="t013",targetState="waitCmd",cond=whenEvent("endTaskEventCmd"))
 				}	 
 				state("stopped") { //this:State
 					action { //it:State
 					}
-					 transition(edgeName="t010",targetState="resuming",cond=whenEvent("situationUnderControl"))
+					 transition(edgeName="t014",targetState="resuming",cond=whenEvent("situationUnderControl"))
 				}	 
 				state("resuming") { //this:State
 					action { //it:State
 						itunibo.robot.plannerBhestie.requestNextMove(  )
 					}
-					 transition(edgeName="t011",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
+					 transition(edgeName="t015",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
 				}	 
 			}
 		}
