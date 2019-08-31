@@ -66,35 +66,76 @@ public class MqttConnection {
     }
 
     public void notice(String notice){
-        String payload = notice.split("(?<=Payload) ")[1];
-        StringTokenizer token = new StringTokenizer(payload);
-        payload = token.nextToken(")");
-        token = new StringTokenizer(payload);
+        if(notice.startsWith("msg(roomStateEvent")){
+            StringTokenizer token = new StringTokenizer(notice, "(");
+            token.nextToken();
+            token.nextToken();
+            String payload = token.nextToken("(");
+            payload = new StringTokenizer(payload, ")").nextToken();
+            token = new StringTokenizer(payload);
+            String fullText = "";
 
-        String fullText = "";
+            fullText += "piatti puliti nella pantry      = " + token.nextToken(";") + "\n";
+            fullText += "piatti puliti nella dishwasher  = " + token.nextToken(";") + "\n";
 
-        StringTokenizer internalTokenizer = new StringTokenizer((token.nextToken(";")));
-        String foodCode = internalTokenizer.nextToken(",");
-        String qt = internalTokenizer.nextToken(",");
-        String description = internalTokenizer.nextToken(",");
-        fullText += foodCode + "  ";
-        fullText += qt + "  ";
-        fullText += description + "  ";
-        fullText += "\n";
+            StringTokenizer internalTokenizer = new StringTokenizer((token.nextToken(";")));
 
-        String actualToken = "";
-        while(token.hasMoreTokens()){
-            internalTokenizer = new StringTokenizer(token.nextToken(";"));
-            foodCode = internalTokenizer.nextToken(",");
-            qt = internalTokenizer.nextToken(",");
-            description = internalTokenizer.nextToken(",");
+
+
+            String foodCode = internalTokenizer.nextToken(",");
+            String qt = internalTokenizer.nextToken(",");
+            String description = internalTokenizer.nextToken(",");
             fullText += foodCode + "  ";
             fullText += qt + "  ";
             fullText += description + "  ";
-
             fullText += "\n";
+
+            String actualToken = "";
+            while (token.hasMoreTokens()) {
+                internalTokenizer = new StringTokenizer(token.nextToken(";"));
+                foodCode = internalTokenizer.nextToken(",");
+                qt = internalTokenizer.nextToken(",");
+                description = internalTokenizer.nextToken(",");
+                fullText += foodCode + "  ";
+                fullText += qt + "  ";
+                fullText += description + "  ";
+
+                fullText += "\n";
+            }
+            noticePanel.setText(fullText);
+
         }
-        noticePanel.setText(fullText);
+        else if(notice.startsWith("msg(recvFoodMsgEvent")) {
+            String payload = notice.split("(?<=Payload) ")[1];
+            StringTokenizer token = new StringTokenizer(payload);
+            payload = token.nextToken(")");
+            token = new StringTokenizer(payload);
+
+            String fullText = "";
+
+            StringTokenizer internalTokenizer = new StringTokenizer((token.nextToken(";")));
+            String foodCode = internalTokenizer.nextToken(",");
+            String qt = internalTokenizer.nextToken(",");
+            String description = internalTokenizer.nextToken(",");
+            fullText += foodCode + "  ";
+            fullText += qt + "  ";
+            fullText += description + "  ";
+            fullText += "\n";
+
+            String actualToken = "";
+            while (token.hasMoreTokens()) {
+                internalTokenizer = new StringTokenizer(token.nextToken(";"));
+                foodCode = internalTokenizer.nextToken(",");
+                qt = internalTokenizer.nextToken(",");
+                description = internalTokenizer.nextToken(",");
+                fullText += foodCode + "  ";
+                fullText += qt + "  ";
+                fullText += description + "  ";
+
+                fullText += "\n";
+            }
+            noticePanel.setText(fullText);
+        }
     }
 
     public void subscribe(String topic){

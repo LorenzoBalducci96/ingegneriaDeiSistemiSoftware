@@ -28,6 +28,7 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 						 }
 						if(currentSolution.isSuccess()) { itunibo.robot.robotSupport.create(myself ,getCurSol("R").toString(), getCurSol("PORT").toString() )
 						itunibo.robot.plannerBhestie.create(myself)
+						itunibo.robot.roomState.create(myself)
 						itunibo.comunicationMessageClient.comunicationMessageClient.init(myself)
 						 }
 					}
@@ -41,6 +42,27 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 					transition(edgeName="t02",targetState="handleMaitreCmd",cond=whenEvent("maitreCmd"))
 					transition(edgeName="t03",targetState="handleFridgeRequest",cond=whenEvent("fridgeRequest"))
 					transition(edgeName="t04",targetState="handleRecvFoodMsgEvent",cond=whenEvent("recvFoodMsgEvent"))
+					transition(edgeName="t05",targetState="handleRoomStateRequest",cond=whenEvent("roomStateRequest"))
+					transition(edgeName="t06",targetState="handleRoomStateEvent",cond=whenEvent("roomStateEvent"))
+				}	 
+				state("handleRoomStateEvent") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("roomStateEvent(X)"), Term.createTerm("roomStateEvent(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								emit("roomStateEvent", "roomStateEvent(${payloadArg(0)})" ) 
+						}
+					}
+					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
+				}	 
+				state("handleRoomStateRequest") { //this:State
+					action { //it:State
+						println("I'M IN HANDLE ROOM STATE REQUEST")
+						if( checkMsgContent( Term.createTerm("roomStateRequest(X)"), Term.createTerm("roomStateRequest(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								itunibo.robot.roomState.emitRoomState(  )
+						}
+					}
+					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
 				}	 
 				state("handleFridgeRequest") { //this:State
 					action { //it:State
@@ -106,11 +128,11 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 								itunibo.robot.plannerBhestie.requestNextMove(  )
 						}
 					}
-					 transition(edgeName="t05",targetState="waitCmd",cond=whenEvent("foodUnavailable"))
-					transition(edgeName="t06",targetState="waitingPlannerDecision",cond=whenEvent("fridgeRequest"))
-					transition(edgeName="t07",targetState="waitingPlannerDecision",cond=whenEvent("recvFoodMsgEvent"))
-					transition(edgeName="t08",targetState="waitingPlannerDecision",cond=whenEvent("foodAvailable"))
-					transition(edgeName="t09",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
+					 transition(edgeName="t07",targetState="waitCmd",cond=whenEvent("foodUnavailable"))
+					transition(edgeName="t08",targetState="waitingPlannerDecision",cond=whenEvent("fridgeRequest"))
+					transition(edgeName="t09",targetState="waitingPlannerDecision",cond=whenEvent("recvFoodMsgEvent"))
+					transition(edgeName="t010",targetState="waitingPlannerDecision",cond=whenEvent("foodAvailable"))
+					transition(edgeName="t011",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
 				}	 
 				state("progressPlanner") { //this:State
 					action { //it:State
@@ -126,21 +148,21 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 								itunibo.robot.plannerBhestie.requestNextMove(  )
 						}
 					}
-					 transition(edgeName="t010",targetState="stopped",cond=whenEvent("alarm"))
-					transition(edgeName="t011",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
-					transition(edgeName="t012",targetState="progressPlanner",cond=whenEvent("ackMsg"))
-					transition(edgeName="t013",targetState="waitCmd",cond=whenEvent("endTaskEventCmd"))
+					 transition(edgeName="t012",targetState="stopped",cond=whenEvent("alarm"))
+					transition(edgeName="t013",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
+					transition(edgeName="t014",targetState="progressPlanner",cond=whenEvent("ackMsg"))
+					transition(edgeName="t015",targetState="waitCmd",cond=whenEvent("endTaskEventCmd"))
 				}	 
 				state("stopped") { //this:State
 					action { //it:State
 					}
-					 transition(edgeName="t014",targetState="resuming",cond=whenEvent("situationUnderControl"))
+					 transition(edgeName="t016",targetState="resuming",cond=whenEvent("situationUnderControl"))
 				}	 
 				state("resuming") { //this:State
 					action { //it:State
 						itunibo.robot.plannerBhestie.requestNextMove(  )
 					}
-					 transition(edgeName="t015",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
+					 transition(edgeName="t017",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
 				}	 
 			}
 		}

@@ -9,6 +9,11 @@ Event  ackMsg		: ackMsg(X)
 Event  fridgeRequest : fridgeRequest(X)
 Event  recvFoodMsgEvent : recvFoodMsgEvent(X)
 Event  endTaskEventCmd : endTaskEventCmd(X)
+Event roomStateRequest : roomStateRequest(X)
+Event roomStateEvent : roomStateEvent(X)
+Event  addDish		: addDish(X)
+Event  removeDish	: removeDish(X)
+
 Event foodAvailable : foodAvailable(X)
 Event foodUnavailable : foodUnavailable(X)
 Event  alarm		: alarm(X)
@@ -44,6 +49,7 @@ QActor basicrobot context ctxBasicRobot {
    		ifSolved{ 
    			run itunibo.robot.robotSupport.create(myself, @R, @PORT ) 
    			run itunibo.robot.plannerBhestie.create(myself)
+   			run itunibo.robot.roomState.create(myself)
    			run itunibo.comunicationMessageClient.comunicationMessageClient.init(myself)
    			/*
    			run itunibo.robot.plannerBhestie.create(myself, @PORT, @PORT,
@@ -83,7 +89,24 @@ QActor basicrobot context ctxBasicRobot {
 		          whenEvent	maitreCmd -> handleMaitreCmd
 		          whenEvent fridgeRequest -> handleFridgeRequest
 		          whenEvent recvFoodMsgEvent -> handleRecvFoodMsgEvent
+		          whenEvent roomStateRequest -> handleRoomStateRequest
+		          whenEvent roomStateEvent -> handleRoomStateEvent
 		          
+	State handleRoomStateEvent{
+		onMsg( roomStateEvent : roomStateEvent(X)){
+			emit roomStateEvent : roomStateEvent($payloadArg(0))
+		}
+	}
+	Goto waitCmd          
+	
+	State handleRoomStateRequest{
+		println("I'M IN HANDLE ROOM STATE REQUEST")
+		onMsg( roomStateRequest : roomStateRequest(X)){
+			run itunibo.robot.roomState.emitRoomState()
+		}
+	}
+	Goto waitCmd	          
+	
 	State handleFridgeRequest{
 		println("I'M IN HANDLEFRIDGEREQUEST STATE")
 		onMsg( fridgeRequest : fridgeRequest(X)){
