@@ -131,6 +131,19 @@ object comunicationMessageClient {
             e.printStackTrace()
         }
 	}
+	
+	fun addToFridge(foodCode: String, foodDescription: String, foodQt: Int) {
+		var message: Comunication_Message = Comunication_Message(TYPE.TYPE_ADD_FOOD, foodCode + "," + foodDescription + "," + foodQt);
+	    var gson: Gson = Gson();        
+		val messageGson = gson.toJson(message);
+        sendData = messageGson.toByteArray()
+        try {
+            clientSocket!!.send(DatagramPacket(sendData!!, sendData!!.size, ipAddr, port))
+        } catch (e: IOException) {
+            // TODO Auto-generated catch block
+            e.printStackTrace()
+        }
+	}
 }
 
 

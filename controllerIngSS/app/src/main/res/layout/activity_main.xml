@@ -88,8 +88,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Button"
-            tools:text="sparecchia" />
+            android:text="Sparecchia" />
 
         <Button
             android:id="@+id/fridgeRequest"
@@ -191,9 +190,9 @@
             android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="PREMERE IL PULSANTE PER UTILIZZARE I COMANDI VOCALI"
+            android:text="PREMERE PER UTILIZZARE I COMANDI VOCALI"
             android:textColor="@color/colorPrimary"
-            android:textSize="24sp" />
+            android:textSize="18sp" />
 
         <ImageButton
             android:id="@+id/record"

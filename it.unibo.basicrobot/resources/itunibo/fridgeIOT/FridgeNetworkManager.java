@@ -85,6 +85,16 @@ public class FridgeNetworkManager {
 					howMuch = Integer.parseInt(splitted[1].trim());
 					fridge.removeFood(foodIdRequested, howMuch);
 					break;
+					
+				case TYPE_ADD_FOOD:
+					payloadMessage = message.getPayload();
+					splitted = payloadMessage.split(",");
+					
+					foodIdRequested = splitted[0].trim();
+					String description = splitted[1].trim();
+					howMuch = Integer.parseInt(splitted[2].trim());
+					fridge.addFood(foodIdRequested,  description, howMuch);
+					break;
 
 				case TYPE_RESPONSE_ID:
 					System.out.println("Error, Can't receive RESPONSE type messages");

@@ -65,7 +65,12 @@ object plannerBhestie{
 			}
 			aiutil.showMap();
 			aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0) as Goal);
-			actions = aiutil.doPlan()
+			var foundPath: Boolean = false;
+			aiutil.doPlan()?.let{actions = it; foundPath = true}
+			while(!foundPath){
+				RoomMap.getRoomMap().resetObstaclesOnMap();
+				aiutil.doPlan()?.let{actions = it; foundPath = true}
+			}
 		}
 	}
 	
@@ -79,7 +84,14 @@ object plannerBhestie{
 				else{
 					if(goals_step.elementAt(0) is Goal){
 						aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0) as Goal);
-						actions = aiutil.doPlan()
+						
+						var foundPath: Boolean = false;
+						aiutil.doPlan()?.let{actions = it; foundPath = true}
+						while(!foundPath){
+							RoomMap.getRoomMap().resetObstaclesOnMap();
+							aiutil.doPlan()?.let{actions = it; foundPath = true}
+						}
+						
 						move_to_register = actions.removeAt(0)
 						when (move_to_register.toString()) {
 						    "w" -> actor.autoMsg("plannerCmd", "plannerCmd(i)")
@@ -115,7 +127,13 @@ object plannerBhestie{
 					 Goal.TABLE, Task("put_food_on_robot_hands_on_table"),
 					 Goal.HR)
 				aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0) as Goal);//prendo i piatti
-				actions = aiutil.doPlan()
+				
+				var foundPath: Boolean = false;
+				aiutil.doPlan()?.let{actions = it; foundPath = true}
+				while(!foundPath){
+					RoomMap.getRoomMap().resetObstaclesOnMap();
+					aiutil.doPlan()?.let{actions = it; foundPath = true}
+				}
 				aiutil.showMap();
 				
 				actor.autoMsg("ackMsg", "ackMsg(ok)")
@@ -142,7 +160,12 @@ object plannerBhestie{
 					 Goal.TABLE, Task("put_food_on_robot_hands_on_table"),
 					 Goal.HR)
 				aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0) as Goal);//prendo i piatti
-				actions = aiutil.doPlan()
+				var foundPath: Boolean = false;
+				aiutil.doPlan()?.let{actions = it; foundPath = true}
+				while(!foundPath){
+					RoomMap.getRoomMap().resetObstaclesOnMap();
+					aiutil.doPlan()?.let{actions = it; foundPath = true}
+				}
 				aiutil.showMap();
 				
 				actor.autoMsg("fridgeRequest", "fridgeRequest(\"r:" + foodCode + "," + foodQt + "\")")
@@ -158,9 +181,18 @@ object plannerBhestie{
 				//----------------------------------
 			}
 			if(cmd.equals("msg(c)", true)){//sparecchia
-				goals_step = mutableListOf(Goal.TABLE, Goal.DISHWASHER)
+				goals_step = mutableListOf(Goal.TABLE, Task("take_all_dishes_from_table"),
+					Goal.DISHWASHER, Task("put_all_dishes_on_dishwasher"),
+					Goal.TABLE, Task("take_all_food_from_table"),
+					Goal.FRIDGE, Task("put_all_food_on_fridge"))
 				aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0) as Goal);//prendo i piatti
-				actions = aiutil.doPlan()
+				
+				var foundPath: Boolean = false;
+				aiutil.doPlan()?.let{actions = it; foundPath = true}
+				while(!foundPath){
+					RoomMap.getRoomMap().resetObstaclesOnMap();
+					aiutil.doPlan()?.let{actions = it; foundPath = true}
+				}
 				aiutil.showMap();
 				
 				//opzione 1: il planning deve vedere se il fridge ha o meno il food

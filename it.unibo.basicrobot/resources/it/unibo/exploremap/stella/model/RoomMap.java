@@ -49,6 +49,17 @@ public class RoomMap {
 				!roomMap[x][y].isNormalBox())
 			roomMap[x][y] = Box.createNormalBox();
 	}
+	
+	public void resetObstaclesOnMap() {
+		int x = 0;
+		int y = 0;
+		for(x = 0; x < ROOMSIZE; x++ ) {
+			for(y = 0; y < ROOMSIZE; y++) {
+				if(roomMap[x][y].isObstacle())
+					roomMap[x][y] = Box.createNormalBox();
+			}
+		}
+	}
 
 	public void put(int x, int y, Box box) {
 		/*try {

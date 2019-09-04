@@ -107,7 +107,7 @@ QActor basicrobot context ctxBasicRobot {
 			run itunibo.robot.roomState.emitRoomState()
 		}
 	}
-	Goto waitCmd	          
+	Goto waitCmd
 	
 	State handleFridgeRequest{
 		println("I'M IN HANDLEFRIDGEREQUEST STATE")
@@ -123,7 +123,6 @@ QActor basicrobot context ctxBasicRobot {
 			emit recvFoodMsgEvent : recvFoodMsgEvent($payloadArg(0))
 		}
 	}
-	
 	Goto waitCmd
 	
 	State handleUserCmd{ //does not handle alarms 

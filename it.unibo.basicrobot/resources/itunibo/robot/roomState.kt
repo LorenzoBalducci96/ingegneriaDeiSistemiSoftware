@@ -150,9 +150,11 @@ object roomState {
 				var description : String = pezzi[1]
 				var quantity : Int = Integer.parseInt(pezzi[2])
 				this.foodInRobotHands!!.add(FoodInRoom(Food(id, description), quantity))
+				itunibo.comunicationMessageClient.comunicationMessageClient.removeFromFridge(id, quantity)
 			}
 		}
 		else if(cmd.startsWith("put_default_initialization_food")){
+			println("ERROR: NO PREVISED STATE!")
 			foodOnTable = foodInRobotHands
 			foodInRobotHands.clear()
 		}else if(cmd.startsWith("get_food_from_fridge")){
@@ -161,6 +163,19 @@ object roomState {
 			var foodQt: Int = Integer.parseInt(cmd.substringAfter(",").substringBefore(")"))
 			foodInRobotHands.add(FoodInRoom(Food(foodCode), foodQt))
 			itunibo.comunicationMessageClient.comunicationMessageClient.removeFromFridge(foodCode, foodQt)
+		}else if(cmd.startsWith("take_all_dishes_from_table")){
+			dishesInRobotHands = dishesInTable;
+			dishesInTable = 0;
+		}else if(cmd.startsWith("put_all_dishes_on_dishwasher")){
+			dishwasherDishes = dishesInRobotHands
+			dishesInRobotHands = 0;
+		}else if(cmd.startsWith("take_all_food_from_table")){
+			foodInRobotHands = foodOnTable;
+			foodOnTable.clear();
+		}else if(cmd.startsWith("put_all_food_on_fridge")){
+			foodInRobotHands.iterator().forEach {
+				itunibo.comunicationMessageClient.comunicationMessageClient.addToFridge(it.food.foodId, it.food.description, it.quantity)
+			}
 		}
 	}
 }

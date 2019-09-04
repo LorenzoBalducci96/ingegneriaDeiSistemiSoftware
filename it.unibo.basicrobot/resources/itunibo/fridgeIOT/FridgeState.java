@@ -30,6 +30,17 @@ public class FridgeState {
 		}
 		return quantity;
 	}
+	
+	public boolean addFood(String code, String description, int quantity) {
+		for(FoodInFridge f : foodAvailables) {
+			if(f.getFood().getFoodId().equalsIgnoreCase(code)) {
+				f.setQuantity(f.getQuantity() + quantity);
+				return true;
+			}
+		}
+		//Cibo non presente in lista, lo aggiungo e setto la quantita' a quantity
+		return foodAvailables.add(new FoodInFridge(new Food(code,description),quantity));
+	}
 
 	public boolean addFood(String code, String description) {
 		for(FoodInFridge f : foodAvailables) {
