@@ -18,9 +18,9 @@ object Program {
         println("Running Test 1 -------------------------")
         var result1: SolveInfo
         try {
-            result1 = risolutore.solve("cibo(banana)")
+            result1 = risolutore.solve("cibo(banana, X)")
             println("cibo(banana) appartiene alla KB? [PRIMO RISULTATO] $result1")
-            result1 = risolutore.solve("cibo(pokemon)")
+            result1 = risolutore.solve("cibo(pokemon, X), X > 4")
             println("cibo(pokemon) appartiene alla KB? [SECONDO RISULTATO] $result1")
         } catch (e1: MalformedGoalException) {}
 

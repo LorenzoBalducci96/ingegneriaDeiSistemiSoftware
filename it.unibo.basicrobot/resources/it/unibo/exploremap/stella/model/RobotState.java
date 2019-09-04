@@ -121,7 +121,11 @@ public class RobotState {
 		UP, RIGHT, DOWN, LEFT;
 	}
 
-	public enum Goal{
+	public interface PlannerStep{
+		
+	}
+	
+	public enum Goal implements PlannerStep{
 		TABLE,
 		PANTRY,
 		DISHWASHER,
@@ -129,3 +133,5 @@ public class RobotState {
 		HR
 	}
 }
+
+

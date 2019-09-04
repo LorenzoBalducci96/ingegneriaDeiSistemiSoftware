@@ -49,8 +49,7 @@ public class FridgeNetworkManager {
 						System.out.println("Yes, avaiable in requested quantity");
 						InetAddress IPAddress = receivePacket.getAddress();
 						int port = receivePacket.getPort();
-						String foodQuantity = ""+fridge.getFoodQuantity(foodIdRequested);
-						Comunication_Message responseMessage = new Comunication_Message(TYPE.TYPE_RESPONSE_ID, foodIdRequested+","+foodQuantity);
+						Comunication_Message responseMessage = new Comunication_Message(TYPE.TYPE_RESPONSE_ID, "yes");
 						String finalGson = gson.toJson(responseMessage);
 						sendData = finalGson.getBytes();
 						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
@@ -59,6 +58,13 @@ public class FridgeNetworkManager {
 					}
 					else {
 						System.out.println("No,not avaiable in requested quantity");
+						InetAddress IPAddress = receivePacket.getAddress();
+						int port = receivePacket.getPort();
+						Comunication_Message responseMessage = new Comunication_Message(TYPE.TYPE_RESPONSE_ID, "no");
+						String finalGson = gson.toJson(responseMessage);
+						sendData = finalGson.getBytes();
+						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
+						serverSocket.send(sendPacket);
 						break;
 					}
 				case TYPE_REQUEST_FOOD_LIST:
@@ -70,6 +76,14 @@ public class FridgeNetworkManager {
 					DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 					serverSocket.send(sendPacket);
 					System.out.println("Sent fridge state "+ finalGson);
+					break;
+					
+				case TYPE_REMOVE_FOOD:
+					payloadMessage = message.getPayload();
+					splitted = payloadMessage.split(",");
+					foodIdRequested = splitted[0].trim();
+					howMuch = Integer.parseInt(splitted[1].trim());
+					fridge.removeFood(foodIdRequested, howMuch);
 					break;
 
 				case TYPE_RESPONSE_ID:

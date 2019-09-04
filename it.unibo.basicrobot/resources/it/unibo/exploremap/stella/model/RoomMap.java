@@ -37,6 +37,18 @@ public class RoomMap {
 		//roomMap[0][4] = Box.createFridge();
 		//roomMap[4][0] = Box.createPantry();
 	}
+	
+	public void remove(int x, int y) {
+		if(x < 0 || x > ROOMSIZE || y < 0 || y > ROOMSIZE)
+			return;
+		
+		if(!roomMap[x][y].isFridge() && 
+				!roomMap[x][y].isPantry() && 
+				!roomMap[x][y].isTable() &&
+				!roomMap[x][y].isDishwaser() &&
+				!roomMap[x][y].isNormalBox())
+			roomMap[x][y] = Box.createNormalBox();
+	}
 
 	public void put(int x, int y, Box box) {
 		/*try {
@@ -50,11 +62,11 @@ public class RoomMap {
 			}
 			roomMap.get(y).add(x, box);
 		}*/
-
 		if(x < 0 || x > ROOMSIZE || y < 0 || y > ROOMSIZE)
 			return;
 
-		roomMap[x][y] = box;
+		if(roomMap[x][y].isNormalBox())
+			roomMap[x][y] = box;
 	}
 
 	public boolean isObstacle(int x, int y) {

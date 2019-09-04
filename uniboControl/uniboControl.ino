@@ -17,6 +17,7 @@ int count;
 MeUltrasonicSensor ultrasonic_3(3);
 MeRGBLed rgbled_7(7, 7==7?2:4);
 void remoteCmdExecutor();
+MeBuzzer buzzer;
 
 float forward_1_square_time = 0.7;
 float rotate_time = 0.555; 
@@ -123,11 +124,18 @@ void remoteCmdExecutor()
           case 114 : rotateRight90();  break;  //r
           case 108 : rotateLeft90(); break;    //l
           case 105 : foward1Square(); break; //i
+          case 101 : executeAction(); break; //execute action
           case 102 : move(1,0); stopFollow = false; break;  //f
           //default  : move(1,0); stopFollow = true;
           default  : rotateRight90(); stopFollow = true;
         }
     }
+}
+
+void executeAction(){
+    buzzer.tone(1000, 1000);
+    delay(500);
+    buzzer.tone(0, 1000);
 }
 
 void rotateLeft90()
@@ -229,6 +237,9 @@ void move(int direction, int speed)
  */
 void setup(){
     Serial.begin(115200);
+     buzzer.tone(1000, 1000);
+    delay(500);
+    buzzer.tone(0, 1000);
     Serial.println("uniboControl start");
 }
 

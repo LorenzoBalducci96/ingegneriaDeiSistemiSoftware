@@ -25,6 +25,16 @@ object robotSupport{
 		}
 	}
 	
+	fun executeAction( ){ //cmd = msg(M) M=w | a | s | d | h
+		println("robotSupport execute action mock")
+		when( robotKind ){
+			"virtual"  -> { println("not implemented on virtual robot ")}	
+			"realmbot" -> { itunibo.robotMbot.mbotSupport.executeAction() }
+			"realnano" -> { println("not implemented on virtual realnano ")}
+			else       -> println( "robot unknown" )
+		}
+	}
+	
 	fun waitAck(){ //cmd = msg(M) M=w | a | s | d | h
 		println("robotSupport waitAck" )
 		when( robotKind ){

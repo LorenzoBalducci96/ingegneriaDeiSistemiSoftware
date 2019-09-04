@@ -7,6 +7,7 @@ public class Box {
 	private boolean isFridge;
 	private boolean isDishwaser;
 	private boolean isRobot;
+	private boolean isNormalBox;
 	
 	//Costruttore completo
 	private Box(boolean isObstacle, boolean isTable, boolean isPantry, boolean isFridge, boolean isDishwaser,
@@ -17,6 +18,8 @@ public class Box {
 		this.isFridge = isFridge;
 		this.isDishwaser = isDishwaser;
 		this.isRobot = isRobot;
+		if(!isObstacle && !isTable && !isPantry && ! isFridge && !isDishwaser && !isRobot)
+			this.isNormalBox = true;
 	}
 
 	//Casella dishwasher
@@ -52,6 +55,10 @@ public class Box {
 	//Casella normale
 	public static Box createNormalBox() {
 		return new Box(false, false, false, false, false, false);
+	}
+	
+	public boolean isNormalBox() {
+		return this.isNormalBox;
 	}
 	
 	public void setRobot(boolean isRobot) {

@@ -8,10 +8,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -27,6 +32,7 @@ import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.StringTokenizer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,6 +46,11 @@ public class MainActivity extends AppCompatActivity {
     Button apparecchia;
     Button fridgeRequest;
     Button roomStateRequest;
+    Button addFood;
+    Button plusFoodQt;
+    Button minusFoodQt;
+    Spinner foodList;
+    EditText foodQt;
     TextView textScrollView;
 
     ImageButton record;
@@ -59,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         String clientId = MqttClient.generateClientId();
+        String requestedFood = "";
 
         left = findViewById(R.id.left_button);
         right = findViewById(R.id.right_button);
@@ -71,6 +83,39 @@ public class MainActivity extends AppCompatActivity {
         fridgeRequest = findViewById(R.id.fridgeRequest);
         textScrollView = findViewById(R.id.noticeView);
         roomStateRequest = findViewById(R.id.roomStateRequest);
+        addFood = findViewById(R.id.addFood);
+        foodList = findViewById(R.id.foodList);
+        foodQt = findViewById(R.id.foodQt);
+        plusFoodQt = findViewById(R.id.plus);
+        minusFoodQt = findViewById(R.id.minus);
+
+        ArrayList<String> arrayList = new ArrayList<>();
+        arrayList.add("123,piatto di melanzane");
+        arrayList.add("182,salmone alla griglia");
+        arrayList.add("188,patatine arrosto");
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, arrayList);
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        foodList.setAdapter(arrayAdapter);
+
+
+        plusFoodQt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String var = foodQt.getText().toString();
+                foodQt.setText(String.valueOf(Integer.parseInt(var.trim()) + 1));
+                //foodQt.setText(Integer.parseInt(foodQt.getText().toString()) + 1);
+            }
+        });
+
+        minusFoodQt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String var = foodQt.getText().toString();
+                if(!var.equals("0"))
+                    foodQt.setText(String.valueOf(Integer.parseInt(var.trim()) - 1));
+            }
+        });
 
         connection = new MqttConnection(this.getApplicationContext(), textScrollView);
         connection.subscribe("unibo/qak/events");
@@ -151,6 +196,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 speak();
+            }
+        });
+
+        addFood.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String foodCode = foodList.getItemAtPosition(foodList.getSelectedItemPosition()).toString();
+                StringTokenizer tokenizer = new StringTokenizer(foodCode);
+                foodCode = tokenizer.nextToken(",");
+                String payloadMsg = foodCode + "," + foodQt.getText().toString();
+                connection.SendCommand("unibo/qak/events", "msg(maitreCmd,event,frontend,none,maitreCmd(\"a:" + payloadMsg + "\"),10)");
             }
         });
     }

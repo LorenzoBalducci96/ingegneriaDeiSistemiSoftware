@@ -1,5 +1,11 @@
 package itunibo.fridgeIOT;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Food {
 private String foodId;
 private String description;
@@ -7,6 +13,23 @@ private String description;
 public Food(String foodId, String description) {
 	this.foodId = foodId;
 	this.description = description;
+}
+
+public Food(String foodId) {
+	this.foodId = foodId;
+	this.description = "";
+	String line = null;
+	try {
+		BufferedReader reader = new BufferedReader(new FileReader("C:\\SERVER_DATA\\knoledgebase_descriptions.txt"));
+		while((line = reader.readLine()) != null) {
+			String[] pezzi = line.split(",");
+			if(pezzi[0].equalsIgnoreCase(foodId))
+				description = pezzi[1];
+		}
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 }
 
 

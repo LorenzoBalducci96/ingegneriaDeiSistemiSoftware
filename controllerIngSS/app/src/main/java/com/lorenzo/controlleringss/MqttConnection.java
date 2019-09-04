@@ -78,32 +78,31 @@ public class MqttConnection {
             fullText += "piatti puliti nella pantry      = " + token.nextToken(";") + "\n";
             fullText += "piatti puliti nella dishwasher  = " + token.nextToken(";") + "\n";
 
-            StringTokenizer internalTokenizer = new StringTokenizer((token.nextToken(";")));
+            if(token.hasMoreTokens()) {
+                StringTokenizer internalTokenizer = new StringTokenizer((token.nextToken(";")));
 
-
-
-            String foodCode = internalTokenizer.nextToken(",");
-            String qt = internalTokenizer.nextToken(",");
-            String description = internalTokenizer.nextToken(",");
-            fullText += foodCode + "  ";
-            fullText += qt + "  ";
-            fullText += description + "  ";
-            fullText += "\n";
-
-            String actualToken = "";
-            while (token.hasMoreTokens()) {
-                internalTokenizer = new StringTokenizer(token.nextToken(";"));
-                foodCode = internalTokenizer.nextToken(",");
-                qt = internalTokenizer.nextToken(",");
-                description = internalTokenizer.nextToken(",");
+                String foodCode = internalTokenizer.nextToken(",");
+                String qt = internalTokenizer.nextToken(",");
+                String description = internalTokenizer.nextToken(",");
                 fullText += foodCode + "  ";
                 fullText += qt + "  ";
                 fullText += description + "  ";
-
                 fullText += "\n";
+
+                String actualToken = "";
+                while (token.hasMoreTokens()) {
+                    internalTokenizer = new StringTokenizer(token.nextToken(";"));
+                    foodCode = internalTokenizer.nextToken(",");
+                    qt = internalTokenizer.nextToken(",");
+                    description = internalTokenizer.nextToken(",");
+                    fullText += foodCode + "  ";
+                    fullText += qt + "  ";
+                    fullText += description + "  ";
+
+                    fullText += "\n";
+                }
             }
             noticePanel.setText(fullText);
-
         }
         else if(notice.startsWith("msg(recvFoodMsgEvent")) {
             String payload = notice.split("(?<=Payload) ")[1];

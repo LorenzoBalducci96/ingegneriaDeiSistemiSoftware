@@ -76,12 +76,66 @@ object comunicationMessageClient {
 					gson.fromJson(reader, Comunication_Message::class.java)
 				
 				//receivedComunicationMessage = comunicationMessage
-				var prova: String = "recvFoodMsgEvent(" + comunicationMessage.toString() + ")";
-				println(prova)
+				var msg: String = "recvFoodMsgEvent(" + comunicationMessage.toString() + ")";
+				println(msg)
 				
 				//actor!!.autoMsg("recvFoodMsgEvent", "recvFoodMsgEvent(ok)")
-				actor!!.autoMsg("recvFoodMsgEvent", "recvFoodMsgEvent(\"Tipo TYPE_RESPONSE_FOOD_LIST Payload 123,4,piatto di melanzane;182,10,salmone alla griglia;188,7,patatine arrosto\")")     
+				actor!!.autoMsg("recvFoodMsgEvent", "recvFoodMsgEvent(\"" + msg + "\")")     
+	        }
+			if (cmd.startsWith("msg(r", ignoreCase = true)) {
+				//ricevo msh(r:123,2)
+				var payload:String = cmd.substringAfter(":")
+				payload = payload.substringBefore(")")
+				var foodCode: String = payload.substringBefore(",")
+				var foodQt: String = payload.substringAfter(",")
+	            var gson: Gson = Gson();
+	            var message: Comunication_Message = Comunication_Message(TYPE.TYPE_REQUEST_ID, foodCode + "," + foodQt);
+				
+	            val messageGson = gson.toJson(message);
+	            sendData = messageGson.toByteArray()
+	            try {
+	                clientSocket!!.send(DatagramPacket(sendData!!, sendData!!.size, ipAddr, port))
+	            } catch (e: IOException) {
+	                // TODO Auto-generated catch block
+	                e.printStackTrace()
+	            }
+				var ricezione: DatagramPacket = DatagramPacket(recvData, recvData!!.size)
+				clientSocket!!.receive(ricezione);
+				
+				var receivedMessage: String = String(ricezione.getData())
+				var reader: JsonReader = JsonReader(StringReader(receivedMessage))
+				reader.setLenient(true)
+				
+				
+				var comunicationMessage: Comunication_Message =
+					gson.fromJson(reader, Comunication_Message::class.java)
+				
+				//receivedComunicationMessage = comunicationMessage
+				var msg: String = "recvFoodMsgEvent(" + comunicationMessage.toString() + ")";
+				println(msg)
+				
+				actor!!.autoMsg("recvFoodMsgEvent", "recvFoodMsgEvent(\"" + msg + "\")")         
 	        }
 		}
     }
+	
+	fun removeFromFridge(foodCode: String, foodQt: Int) {
+		var message: Comunication_Message = Comunication_Message(TYPE.TYPE_REMOVE_FOOD, foodCode + "," + foodQt);
+	    var gson: Gson = Gson();        
+		val messageGson = gson.toJson(message);
+        sendData = messageGson.toByteArray()
+        try {
+            clientSocket!!.send(DatagramPacket(sendData!!, sendData!!.size, ipAddr, port))
+        } catch (e: IOException) {
+            // TODO Auto-generated catch block
+            e.printStackTrace()
+        }
+	}
 }
+
+
+
+
+
+
+

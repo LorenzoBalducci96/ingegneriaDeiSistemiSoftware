@@ -14,6 +14,10 @@ object mbotSupport{
 		initConn( port )
 	}
 	
+	fun executeAction(){
+		conn.sendALine("e")
+	}
+	
 	fun move( cmd : String ){
 		println("mbotSupport move cmd=$cmd conn=$conn")
 		when( cmd ){

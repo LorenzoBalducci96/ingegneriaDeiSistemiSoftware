@@ -14,12 +14,14 @@ import it.unibo.exploremap.stella.model.RobotState
 import java.util.StringTokenizer
 import itunibo.fridgeIOT.Food
 import itunibo.fridgeIOT.FoodInFridge
+import it.unibo.exploremap.stella.model.RobotState.PlannerStep
+import it.unibo.exploremap.stella.model.Task
  
 
 object plannerBhestie{
 	lateinit var actor: ActorBasic
 	lateinit private var actions: MutableList<Action>
-	lateinit private var goals_step: MutableList<Goal>
+	lateinit private var goals_step: MutableList<PlannerStep>
 	lateinit private var move_to_register: Action
 	lateinit private var foodRequestedList: MutableList<FoodInFridge>
 	
@@ -62,7 +64,7 @@ object plannerBhestie{
 				Direction.LEFT -> RoomMap.getRoomMap().put(aiutil.initialState.getX() - 1, aiutil.initialState.getY(), Box.createObstacle())
 			}
 			aiutil.showMap();
-			aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0));
+			aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0) as Goal);
 			actions = aiutil.doPlan()
 		}
 	}
@@ -75,14 +77,19 @@ object plannerBhestie{
 					actor.autoMsg("endTaskEventCmd", "endTaskEventCmd(GOAL)")
 				}
 				else{
-					aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0));
-					actions = aiutil.doPlan()
-					move_to_register = actions.removeAt(0);
-					when (move_to_register.toString()) {
-					    "w" -> actor.autoMsg("plannerCmd", "plannerCmd(i)")
-					    "a" -> actor.autoMsg("plannerCmd", "plannerCmd(l)")
-						"s" -> actor.autoMsg("plannerCmd", "plannerCmd(h)")
-						"d" -> actor.autoMsg("plannerCmd", "plannerCmd(r)")
+					if(goals_step.elementAt(0) is Goal){
+						aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0) as Goal);
+						actions = aiutil.doPlan()
+						move_to_register = actions.removeAt(0)
+						when (move_to_register.toString()) {
+						    "w" -> actor.autoMsg("plannerCmd", "plannerCmd(i)")
+						    "a" -> actor.autoMsg("plannerCmd", "plannerCmd(l)")
+							"s" -> actor.autoMsg("plannerCmd", "plannerCmd(h)")
+							"d" -> actor.autoMsg("plannerCmd", "plannerCmd(r)")
+						}
+					}else if(goals_step.elementAt(0) is Task){
+						var action: String = (goals_step.elementAt(0) as Task).action
+						actor.autoMsg("plannerTask", "plannerTask(" + action + ")")
 					}
 				}
 			}
@@ -101,9 +108,58 @@ object plannerBhestie{
 	
 	fun action (cmd : String){
 		GlobalScope.launch(){
+			if(cmd.equals("msg(v)", true)){//apparecchia...(prepare)
+				goals_step = mutableListOf(Goal.PANTRY, Task("take_default_initialization_dish"),
+					 Goal.TABLE, Task("put_food_on_robot_hands_on_table"),
+					 Goal.FRIDGE, Task("take_default_initialization_food"),
+					 Goal.TABLE, Task("put_food_on_robot_hands_on_table"),
+					 Goal.HR)
+				aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0) as Goal);//prendo i piatti
+				actions = aiutil.doPlan()
+				aiutil.showMap();
+				
+				actor.autoMsg("ackMsg", "ackMsg(ok)")
+				
+				
+				//opzione 1: il planning deve vedere se il fridge ha o meno il food
+				//actor.autoMsg("fridgeRequest", "fridgeRequest(l)")
+				
+				//opzione 2: il planning non richiede di passare dal fridge
+				//actor!!.autoMsg("foodAvailable", "foodAvailable(ok)")
+				
+				//Da inserire negli stati che richiedono cibo da fridge
+				//----------------------------------
+			}
+			else if(cmd.startsWith("msg(a:", true)){//add food
+				
+				var payload: String = cmd.substringAfter(":")
+				payload = payload.substringBefore(")")
+				println(payload)
+				var foodCode: String = payload.substringBefore(",")
+				var foodQt: String = payload.substringAfter(",")
+				
+				goals_step = mutableListOf(Goal.FRIDGE, Task("get_food_from_fridge(" + payload + ")"),
+					 Goal.TABLE, Task("put_food_on_robot_hands_on_table"),
+					 Goal.HR)
+				aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0) as Goal);//prendo i piatti
+				actions = aiutil.doPlan()
+				aiutil.showMap();
+				
+				actor.autoMsg("fridgeRequest", "fridgeRequest(\"r:" + foodCode + "," + foodQt + "\")")
+				
+				
+				//opzione 1: il planning deve vedere se il fridge ha o meno il food
+				//actor.autoMsg("fridgeRequest", "fridgeRequest(l)")
+				
+				//opzione 2: il planning non richiede di passare dal fridge
+				//actor!!.autoMsg("foodAvailable", "foodAvailable(ok)")
+				
+				//Da inserire negli stati che richiedono cibo da fridge
+				//----------------------------------
+			}
 			if(cmd.equals("msg(c)", true)){//sparecchia
 				goals_step = mutableListOf(Goal.TABLE, Goal.DISHWASHER)
-				aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0));//prendo i piatti
+				aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0) as Goal);//prendo i piatti
 				actions = aiutil.doPlan()
 				aiutil.showMap();
 				
@@ -121,140 +177,67 @@ object plannerBhestie{
 	
 	fun evaluate_food_availability(food : String){
 		GlobalScope.launch(){
-			//decide, in base al parametro String e alla richiesta del food fatta, se sparare un
-			//foodAvailable o un
-			//foodUnavailable (tutti unavailable quindi non si procede con le mosse)
-			var payload: String = food.split("(?<=Payload)".toRegex())[1];
-	        var token: StringTokenizer = StringTokenizer(payload);
-	        payload = token.nextToken(")");
-	        token = StringTokenizer(payload);
-	
-			var availableFood: MutableList<FoodInFridge> = ArrayList<FoodInFridge>()
-			
-	        var internalTokenizer: StringTokenizer = StringTokenizer((token.nextToken(";")));
-	        var foodCode: String = internalTokenizer.nextToken(",");
-	        var qt: String = internalTokenizer.nextToken(",");
-	        var description: String = internalTokenizer.nextToken(",");
-			var food: FoodInFridge = FoodInFridge(Food(foodCode, description), Integer.parseInt(qt))
-			availableFood.add(food)
-	        
-	
-	        var actualToken: String = "";
-	        while(token.hasMoreTokens()){
-	            internalTokenizer = StringTokenizer(token.nextToken(";"));
-	            foodCode = internalTokenizer.nextToken(",");
-	            qt = internalTokenizer.nextToken(",");
-	            description = internalTokenizer.nextToken(",");
-	            var food: FoodInFridge = FoodInFridge(Food(foodCode, description), Integer.parseInt(qt))
-	            availableFood.add(food)
-	        }
-			
-			var foundAlmenoOneFood = false
-			var foundFood = false
-			
-			if(foodRequestedList.isEmpty())
-				foundAlmenoOneFood = true
-			
-			foodRequestedList.iterator().forEach{ foodRequested ->
-				foundFood = false
-				availableFood.iterator().forEach{ foodAvailable ->
-					if(foodAvailable.getFood().getFoodId().equals(foodRequested.getFood().getFoodId(), true)
-					&& foodAvailable.getQuantity() >= foodRequested.getQuantity())
-						foundFood = true
-				}
-				if(foundFood)
+			if(food.substringAfter("Tipo :").substringBefore(" Payload").trim().equals("TYPE_RESPONSE_ID")){
+				var payload: String = food.split("(?<=Payload)".toRegex())[1];
+				payload = payload.substringAfter(":")
+				payload = payload.substringBefore(")")
+				if(payload.equals("yes"))
+					actor.emit("foodAvailable", "foodAvailable(ok)")
+				else
+					actor.emit("foodUnavailable", "foodUnavailable(ok)")
+			}
+			else if(food.substringAfter("Tipo :").substringBefore(" Payload").trim().equals("TYPE_RESPONSE_FOOD_LIST")){
+				//decide, in base al parametro String e alla richiesta del food fatta, se sparare un
+				//foodAvailable o un
+				//foodUnavailable (tutti unavailable quindi non si procede con le mosse)
+				var payload: String = food.split("(?<=Payload)".toRegex())[1];
+		        var token: StringTokenizer = StringTokenizer(payload);
+		        payload = token.nextToken(")");
+		        token = StringTokenizer(payload);
+		
+				var availableFood: MutableList<FoodInFridge> = ArrayList<FoodInFridge>()
+				
+		        var internalTokenizer: StringTokenizer = StringTokenizer((token.nextToken(";")));
+		        var foodCode: String = internalTokenizer.nextToken(",");
+		        var qt: String = internalTokenizer.nextToken(",");
+		        var description: String = internalTokenizer.nextToken(",");
+				var food: FoodInFridge = FoodInFridge(Food(foodCode, description), Integer.parseInt(qt))
+				availableFood.add(food)
+		        
+		
+		        var actualToken: String = "";
+		        while(token.hasMoreTokens()){
+		            internalTokenizer = StringTokenizer(token.nextToken(";"));
+		            foodCode = internalTokenizer.nextToken(",");
+		            qt = internalTokenizer.nextToken(",");
+		            description = internalTokenizer.nextToken(",");
+		            var food: FoodInFridge = FoodInFridge(Food(foodCode, description), Integer.parseInt(qt))
+		            availableFood.add(food)
+		        }
+				
+				var foundAlmenoOneFood = false
+				var foundFood = false
+				
+				if(foodRequestedList.isEmpty())
 					foundAlmenoOneFood = true
-			}
-			
-			if(foundAlmenoOneFood){
-				actor!!.emit("foodAvailable", "foodAvailable(ok)")
-			}else{
-				actor.emit("foodUnavailable", "foodUnavailable(ok)")
+				
+				foodRequestedList.iterator().forEach{ foodRequested ->
+					foundFood = false
+					availableFood.iterator().forEach{ foodAvailable ->
+						if(foodAvailable.getFood().getFoodId().equals(foodRequested.getFood().getFoodId(), true)
+						&& foodAvailable.getQuantity() >= foodRequested.getQuantity())
+							foundFood = true
+					}
+					if(foundFood)
+						foundAlmenoOneFood = true
+				}
+				
+				if(foundAlmenoOneFood){
+					actor!!.emit("foodAvailable", "foodAvailable(ok)")
+				}else{
+					actor.emit("foodUnavailable", "foodUnavailable(ok)")
+				}
 			}
 		}
 	}
-	
-	
-	/*
-	fun action (cmd : String){
-		GlobalScope.launch {
-			if(cmd.equals("msg(c)", true)){//sparecchia
-				aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), Goal.TABLE);//prendo i piatti
-				var actions = aiutil.doPlan();
-				
-				aiutil.showMap();
-				
-				actions.forEach {
-					aiutil.doMove(it.toString());
-					aiutil.showMap();
-					when (it.toString()) {
-					    "w" -> actor.autoMsg("plannerCmd", "plannerCmd(i)")
-					    "a" -> actor.autoMsg("plannerCmd", "plannerCmd(l)")
-						"s" -> actor.autoMsg("plannerCmd", "plannerCmd(h)")
-						"d" -> actor.autoMsg("plannerCmd", "plannerCmd(r)")
-					}
-				}
-				
-				println("il robot è arrivato al tavolo e prende i piatti sporchi")
-			
-				aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.direction, Goal.DISHWASHER);//porto i piatti in lavastoviglie
-				actions = aiutil.doPlan();
-				actions.forEach {
-					aiutil.doMove(it.toString());
-					when (it.toString()) {
-					    "w" -> actor.autoMsg("plannerCmd", "plannerCmd(i)")
-					    "a" -> actor.autoMsg("plannerCmd", "plannerCmd(l)")
-						"s" -> actor.autoMsg("plannerCmd", "plannerCmd(h)")
-						"d" -> actor.autoMsg("plannerCmd", "plannerCmd(r)")
-					}
-					aiutil.showMap();
-				}
-				
-			}
-			if(cmd.equals("msg(v)", true)){//apparecchia
-				aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.direction, Goal.PANTRY);
-				var actions = aiutil.doPlan();
-				
-				aiutil.showMap();
-				
-				actions.forEach {
-					aiutil.doMove(it.toString());
-					when (it.toString()) {
-					    "w" -> actor.autoMsg("plannerCmd", "plannerCmd(i)")
-					    "a" -> actor.autoMsg("plannerCmd", "plannerCmd(l)")
-						"s" -> actor.autoMsg("plannerCmd", "plannerCmd(h)")
-						"d" -> actor.autoMsg("plannerCmd", "plannerCmd(r)")
-					}
-					aiutil.showMap();
-				}
-				
-				println("il robot e arrivato alla dispensa, ora prendera i piatti per portarli a tavola")
-				
-				aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.direction, Goal.PANTRY);
-				actions = aiutil.doPlan();
-				actions.forEach {
-					aiutil.doMove(it.toString());
-					when (it.toString()) {
-					    "w" -> actor.autoMsg("plannerCmd", "plannerCmd(i)")
-					    "a" -> actor.autoMsg("plannerCmd", "plannerCmd(l)")
-						"s" -> actor.autoMsg("plannerCmd", "plannerCmd(h)")
-						"d" -> actor.autoMsg("plannerCmd", "plannerCmd(r)")
-					}
-					aiutil.showMap();
-				}
-			}
-			
-			/*
-			actor.autoMsg("plannerCmd", "plannerCmd(i)")
-			delay(600)
-			actor.autoMsg("plannerCmd", "plannerCmd(r)")
-			delay(600)
-			actor.autoMsg("plannerCmd", "plannerCmd(i)")
-			delay(600)
-			actor.autoMsg("endTaskEventCmd", "endTaskEventCmd(h)")
-			 */
-			
-		}
-	}
- */
 }

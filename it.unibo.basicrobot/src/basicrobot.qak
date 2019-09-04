@@ -13,9 +13,11 @@ Event roomStateRequest : roomStateRequest(X)
 Event roomStateEvent : roomStateEvent(X)
 Event  addDish		: addDish(X)
 Event  removeDish	: removeDish(X)
+Event plannerTask   : plannerTask(X)
 
 Event foodAvailable : foodAvailable(X)
 Event foodUnavailable : foodUnavailable(X)
+
 Event  alarm		: alarm(X)
 Event  situationUnderControl	: situationUnderControl(X)
 Event  sonar        : sonar(SONAR, DISTANCE)	 //from sonar in the robot environment   
@@ -47,7 +49,7 @@ QActor basicrobot context ctxBasicRobot {
   		ifSolved{ println( "USING ROBOT : ${getCurSol(\"R\")},  port= ${getCurSol(\"PORT\")} " ) }
   		 else{ println("no robot") }
    		ifSolved{ 
-   			run itunibo.robot.robotSupport.create(myself, @R, @PORT ) 
+   			run itunibo.robot.robotSupport.create(myself, @R, @PORT )
    			run itunibo.robot.plannerBhestie.create(myself)
    			run itunibo.robot.roomState.create(myself)
    			run itunibo.comunicationMessageClient.comunicationMessageClient.init(myself)
@@ -124,8 +126,6 @@ QActor basicrobot context ctxBasicRobot {
 	
 	Goto waitCmd
 	
-	
-	
 	State handleUserCmd{ //does not handle alarms 
 		printCurrentMessage 
 		onMsg( robotCmd : robotCmd( MOVE ) ) { //MOVE = w | a | s | d | h | l | r | i
@@ -161,16 +161,27 @@ QActor basicrobot context ctxBasicRobot {
 			println("RECEIVED FOOD AVAILABLE")
 			run itunibo.robot.plannerBhestie.requestNextMove()
 		}
+		onMsg( ackMsg : ackMsg(X)){
+			println("NO FOOD VERIFICATION FOR THIS TASK...REQUEST NEXT MOVE")
+			run itunibo.robot.plannerBhestie.requestNextMove()
+		}
 	}
 	Transition t0 whenEvent foodUnavailable -> waitCmd
 	whenEvent fridgeRequest -> waitingPlannerDecision
 	whenEvent recvFoodMsgEvent -> waitingPlannerDecision
 	whenEvent foodAvailable -> waitingPlannerDecision
+	whenEvent ackMsg -> waitingPlannerDecision
+	whenEvent foodUnavailable -> waitCmd
 	whenEvent plannerCmd -> progressPlanner
 	
 	
 	State progressPlanner{
 		println("I'M IN PROGRESS PLANNER STATE")
+		onMsg( plannerTask : plannerTask(X)){
+			run itunibo.robot.roomState.updateState("${payloadArg(0)}")
+			run itunibo.robot.robotSupport.executeAction()
+			run itunibo.robot.plannerBhestie.requestNextMove()
+		}
 		onMsg( plannerCmd : plannerCmd(X)){
 			run itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})" )
 			//run itunibo.robot.virtualRobotJavaState.printState()
@@ -185,6 +196,7 @@ QActor basicrobot context ctxBasicRobot {
 	whenEvent plannerCmd -> progressPlanner
 	whenEvent ackMsg -> progressPlanner
 	whenEvent endTaskEventCmd -> waitCmd
+	whenEvent plannerTask -> progressPlanner
 	/*whenEvent	plannerCmd -> waitAck*/
 	
 	

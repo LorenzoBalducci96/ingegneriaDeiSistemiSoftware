@@ -111,9 +111,9 @@ public static RobotState initialState;
 		int y         = initialState.getY();
 		System.out.println("aistruct: doMove move=" +  
 				move + " dir=" + dir +" x=" + x + " y="+y + " dimMapX=" + dimMapx + " dimMapY=" + dimMapy   );
+		RoomMap.getRoomMap().remove(initialState.getX(), initialState.getY());
 		try {
 			switch( move ){
-			
     	 	case "w" :   
 		  		//RoomMap.getRoomMap().put(x, y, new Box(false, false, false)); //clean the cell
  			  	initialState = (RobotState) new Functions().result(initialState, new RobotAction(RobotAction.FORWARD));
