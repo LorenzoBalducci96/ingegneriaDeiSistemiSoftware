@@ -20,6 +20,7 @@ public Food(String foodId) {
 	this.description = "";
 	String line = null;
 	try {
+		//BufferedReader reader = new BufferedReader(new FileReader("/SERVER_DATA/knoledgebase_descriptions.txt"));
 		BufferedReader reader = new BufferedReader(new FileReader("C:\\SERVER_DATA\\knoledgebase_descriptions.txt"));
 		while((line = reader.readLine()) != null) {
 			String[] pezzi = line.split(",");

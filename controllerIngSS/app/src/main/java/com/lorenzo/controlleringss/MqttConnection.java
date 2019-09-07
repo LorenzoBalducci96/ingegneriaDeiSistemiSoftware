@@ -1,8 +1,12 @@
 package com.lorenzo.controlleringss;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -14,6 +18,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.util.StringTokenizer;
 
+import javax.xml.datatype.Duration;
+
 public class MqttConnection {
 
 
@@ -21,9 +27,11 @@ public class MqttConnection {
     private MqttAndroidClient client;
     private String LOGTAG = "";
     private TextView noticePanel;
+    Context context;
 
     public MqttConnection(Context context, TextView noticePanel){
         this.noticePanel = noticePanel;
+        this.context = context;
         client = new MqttAndroidClient(
                 context, "tcp://192.168.43.72:1883", "smartphoneLorenzoBar");
         try{
@@ -31,7 +39,7 @@ public class MqttConnection {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                         try {
-                            client.subscribe("unibo/qak/events", 1);
+                            client.subscribe("unibo/qak/frontend", 1);
                         } catch (MqttException e) {
                             e.printStackTrace();
                         }
@@ -134,6 +142,21 @@ public class MqttConnection {
                 fullText += "\n";
             }
             noticePanel.setText(fullText);
+        }
+        else if(notice.startsWith("msg(maitreWarning")) {
+            StringTokenizer token = new StringTokenizer(notice, "(");
+            token.nextToken();
+            token.nextToken();
+            String payload = token.nextToken("(");
+            payload = new StringTokenizer(payload).nextToken(")");
+
+            if(payload.equals("food_unavailable")){
+                Toast toast = Toast.makeText(context, "cibo richiesto non disponibile nel frigo!",
+                        Toast.LENGTH_LONG);
+                toast.show();
+            }
+
+
         }
     }
 

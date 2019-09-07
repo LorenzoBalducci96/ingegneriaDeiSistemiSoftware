@@ -1,0 +1,322 @@
+System system
+
+mqttBroker "localhost" : 1883    //192.168.1.18  192.168.43.229 192.168.137.1
+
+Dispatch  maitreCmd	: maitreCmd(X)
+Dispatch  plannerCmd	: plannerCmd(X)
+Dispatch  ackMsg		: ackMsg(X)
+Dispatch  fridgeRequest : fridgeRequest(X)
+Dispatch  recvFoodMsgEvent : recvFoodMsgEvent(X)
+Event  endTaskEventCmd : endTaskEventCmd(X)
+Event roomStateRequest : roomStateRequest(X)
+Event roomStateEvent : roomStateEvent(X)
+Event  addDish		: addDish(X)
+Event  removeDish	: removeDish(X)
+Dispatch plannerTask   : plannerTask(X)
+Dispatch removeFromFridge : removeFromFridge(FOOD_ID, QT)
+Dispatch addToFridge : addToFridge(FOOD_ID, DESCRIPTION, QT)
+
+Event foodAvailable : foodAvailable(X)
+Event foodUnavailable : foodUnavailable(X)
+
+Event maitreWarning : maitreWarning(X)
+Event alarm : alarm(X)
+Event  situationUnderControl	: situationUnderControl(X)
+
+Dispatch robotCmd   : robotCmd( CMD )
+Dispatch robotAction : robotAction(ACTION)
+Dispatch executePlanningProject : executePlanningProject(X)
+Dispatch requestNextMove : requestNextMove(X)
+Dispatch registerAck 	: registerAck(X)
+
+Context ctxRobotMind ip [host="localhost" port=8005]   -mqtt
+Context ctxMaitre ip [host="localhost" port=8005] -mqtt
+
+ExternalQActor frontend context ctxMaitre
+
+QActor externalcomunicator context ctxRobotMind {
+	State s0 initial {
+		run itunibo.comunicationMessageClient.comunicationMessageClient.init(myself)
+ 	}Goto handleMsg
+ 	
+ 	
+ 	State handleMsg {
+ 		onMsg (fridgeRequest : fridgeRequest(X)){
+ 			run itunibo.comunicationMessageClient.comunicationMessageClient.requestFoodList("msg(${payloadArg(0)})")
+ 		}
+ 		onMsg (recvFoodMsgEvent : recvFoodMsgEvent(X)){
+ 			forward robotmind -m recvFoodMsgEvent : recvFoodMsgEvent(" + \"\\\"${payloadArg(0)}\\")
+ 		}
+ 		onMsg (foodAvailable : foodAvailable(X)){
+ 			forward robotmind -m foodAvailable : foodAvailable($payloadArg(0))
+ 		}
+ 		onMsg (foodUnavailable : foodUnavailable(X)){
+ 			forward robotmind -m foodUnavailable : foodUnavailable($payloadArg(0))
+ 		}
+ 		onMsg (removeFromFridge : removeFromFridge(FOOD_ID, QT)){
+ 			run itunibo.comunicationMessageClient.comunicationMessageClient.removeFromFridge("${payloadArg(0)}", "${payloadArg(1)}")
+ 		}
+ 		onMsg (addToFridge : addToFridge(FOOD_ID, DESCRIPTION, QT)){
+ 			run itunibo.comunicationMessageClient.comunicationMessageClient.addToFridge("${payloadArg(0)}", "${payloadArg(1)}", "${payloadArg(2)}")
+ 		}
+ 	}Transition t0 whenMsg fridgeRequest -> handleMsg
+ 	whenMsg recvFoodMsgEvent -> handleMsg
+ 	whenMsg foodAvailable -> handleMsg
+ 	whenMsg foodUnavailable -> handleMsg
+ 	whenMsg removeFromFridge -> handleMsg
+ 	whenMsg addToFridge -> handleMsg
+}
+
+QActor robotmind context ctxRobotMind {
+	State s0 initial {
+		
+		run itunibo.robot.roomState.create(myself)
+		
+		solve( consult("initialRoomState.pl") )
+ 		solve( cleanDishesInPantry(DISHES))
+  		run itunibo.robot.roomState.setcleanDishesInPantry(@DISHES)
+  		solve( dishwasherDishes(DISHES))
+  		run itunibo.robot.roomState.setdishwasherDishes(@DISHES)
+		solve( foodOnTable(FOOD_ID, DESCRIPTION, QT))
+		println("foodId = ${getCurSol(\"FOOD_ID\")}")
+		println("description = ${getCurSol(\"DESCRIPTION\")}")
+		println("qt = ${getCurSol(\"QT\")}")
+		run itunibo.robot.roomState.addFoodOnTable(@FOOD_ID, @DESCRIPTION, @QT)
+		
+		solve(consult("prepare_configuration.pl"))
+		solve(defaultDishesInDishwasherToTake(DISHES))
+		run itunibo.robot.roomState.setdefaultDishwasherDishesToTake(@DISHES)
+		solve(foodToPut(FOOD_ID, DESCRIPTION, QT))
+		println("foodId = ${getCurSol(\"FOOD_ID\")}")
+		println("description = ${getCurSol(\"DESCRIPTION\")}")
+		println("qt = ${getCurSol(\"QT\")}")
+		run itunibo.robot.roomState.adddefaultFoodToTakeFromFridge(@FOOD_ID, @DESCRIPTION, @QT)
+ 	}
+	Goto waitCmd
+ 	 
+	State waitCmd{  }
+	Transition t0 whenEvent	maitreCmd -> handleMaitreCmd
+		          whenEvent fridgeRequest -> handleFridgeRequest
+		          whenEvent recvFoodMsgEvent -> handleRecvFoodMsgEvent
+		          whenEvent roomStateRequest -> handleRoomStateRequest
+		          whenEvent roomStateEvent -> handleRoomStateEvent
+		          whenMsg foodUnavailable -> sendMaitreWarning
+		          whenMsg removeFromFridge -> handleRemoveFromFridge
+				  whenMsg addToFridge -> handleAddToFridge
+		          
+	State handleRemoveFromFridge{
+		onMsg(removeFromFridge : removeFromFridge(X)){
+			forward externalcomunicator -m removeFromFridge : removeFromFridge($payloadArg(0), $payloadArg(1))
+		}
+	}Goto waitCmd
+	
+	State handleAddToFridge{
+		onMsg(addToFridge : addToFridge(FOOD_ID, DESCRIPTION, QT)){
+			forward externalcomunicator -m addToFridge : addToFridge($payloadArg(0), " + \"\\\"${payloadArg(1)}\\",  $payloadArg(2))
+		}
+	}Goto waitCmd
+		          
+	State handleRoomStateEvent{
+		onMsg( roomStateEvent : roomStateEvent(X)){
+			forward frontend -m roomStateEvent : roomStateEvent($payloadArg(0))
+		}
+	}
+	Goto waitCmd          
+	
+	State handleRoomStateRequest{
+		onMsg( roomStateRequest : roomStateRequest(X)){
+			run itunibo.robot.roomState.emitRoomState()
+		}
+	}
+	Goto waitCmd
+	
+	State handleFridgeRequest{
+		onMsg( fridgeRequest : fridgeRequest(X)){
+			forward externalcomunicator -m fridgeRequest : fridgeRequest($payloadArg(0))
+		}
+	}
+	Goto waitCmd
+	
+	State handleRecvFoodMsgEvent{
+		onMsg( recvFoodMsgEvent : recvFoodMsgEvent(X)){
+			forward frontend -m recvFoodMsgEvent : recvFoodMsgEvent($payloadArg(0))
+		}
+	}
+	Goto waitCmd
+	
+	State handleMaitreCmd{
+		onMsg( maitreCmd : maitreCmd(ACTION)){
+			["var isAdd = \"${payloadArg(0)}\".startsWith(\"a_\", true)"]
+			if "isAdd" {
+				//run itunibo.comunicationMessageClient.comunicationMessageClient.requestFoodList("msg(${payloadArg(0)})")
+				forward externalcomunicator -m fridgeRequest : fridgeRequest($payloadArg(0))
+			}
+			else {
+				forward  planner -m executePlanningProject : executePlanningProject($payloadArg(0))
+			}
+		}
+	}
+	Transition t0 whenMsg foodAvailable -> okPlan
+	whenMsg foodUnavailable -> sendMaitreWarning
+	whenMsg plannerTask -> doPlan
+	whenMsg plannerCmd -> doPlan
+	
+	State okPlan{
+		forward  planner -m executePlanningProject : executePlanningProject($payloadArg(0))
+	}Goto doPlan
+	
+	State doPlan{
+		onMsg( plannerTask : plannerTask(X)){
+			//println("RICEVUTO PLANNER TASK ROBOTMIND")
+			run itunibo.robot.roomState.updateState("${payloadArg(0)}")
+			forward basicrobot -m robotAction : robotAction($payloadArg(0))
+			//run itunibo.robot.robotSupport.executeAction()
+			//println("INVIO RICHIESTA PROSSIMO STEP ----------------------------")
+			forward  planner -m requestNextMove : requestNextMove($payloadArg(0))
+			//run itunibo.robot.plannerBhestie.requestNextMove()
+		}
+		onMsg( plannerCmd : plannerCmd(X)){
+			//println("invio un comando al robot")
+			forward basicrobot -m robotCmd : robotCmd($payloadArg(0))
+			//run itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})" )
+			//run itunibo.robot.virtualRobotJavaState.printState()
+			//run itunibo.robot.robotSupport.waitAck()
+		}
+		onMsg( ackMsg : ackMsg(X)){
+			//println("INVIO ACK AL PLANNER")
+			forward  planner -m registerAck : registerAck($payloadArg(0))
+		}
+		onMsg( removeFromFridge : removeFromFridge(FOOD_ID, QT)){
+			forward externalcomunicator -m removeFromFridge : removeFromFridge($payloadArg(0), $payloadArg(1))
+		}
+		onMsg( addToFridge : addToFridge(FOOD_ID, DESCRIPTION, QT)){
+				forward externalcomunicator -m addToFridge : addToFridge($payloadArg(0), " + \"\\\"${payloadArg(1)}\\",  $payloadArg(2))
+		}
+	}Transition t0 whenMsg plannerTask -> doPlan
+	whenMsg plannerCmd -> doPlan
+	whenMsg ackMsg -> doPlan
+	whenMsg endTaskEventCmd -> waitCmd
+	whenEvent alarm -> stopped
+	whenMsg removeFromFridge -> doPlan
+	whenMsg addToFridge -> doPlan
+	
+	State sendMaitreWarning{
+		onMsg( foodUnavailable : foodUnavailable(X)){
+			forward frontend -m maitreWarning : maitreWarning($payloadArg(0))
+		}
+	}
+	Goto waitCmd
+	
+	State stopped{
+	}
+	Transition t0 whenEvent	situationUnderControl -> resuming
+	
+	State resuming{
+		forward  planner -m requestNextMove : requestNextMove(X)
+	}Goto doPlan
+	
+}
+
+
+QActor planner context ctxRobotMind{
+	State s0 initial {
+ 		solve( consult("roomConfiguration.pl") )
+ 		solve( pantry(PANTRY_X, PANTRY_Y))
+  		run itunibo.robot.plannerBhestie.putPantry(@PANTRY_X, @PANTRY_Y)
+  		solve( table(TABLE_X, TABLE_Y))
+  		run itunibo.robot.plannerBhestie.putTable(@TABLE_X, @TABLE_Y)
+  		solve( fridge(FRIDGE_X, FRIDGE_Y))
+  		run itunibo.robot.plannerBhestie.putFridge(@FRIDGE_X, @FRIDGE_Y)
+  		solve( dishwasher(DISHWASHER_X, DISHWASHER_Y))
+  		run itunibo.robot.plannerBhestie.putDishwasher(@DISHWASHER_X, @DISHWASHER_Y)
+   		solve( room_size(SIZE))
+   		run itunibo.robot.plannerBhestie.setRoomSize(@SIZE)
+		run itunibo.robot.plannerBhestie.create(myself)
+ 	}  
+	Goto waitCmd  
+	
+	State waitCmd{
+	} Transition t0 whenMsg executePlanningProject -> doPlan
+	
+	State doPlan{
+		onMsg(executePlanningProject : executePlanningProject(X)){
+			run itunibo.robot.plannerBhestie.action("msg(${payloadArg(0)})")
+		}
+	}Transition t0 whenMsg executePlanningProject -> doPlan
+	whenMsg plannerCmd -> doingPlan
+	whenMsg plannerTask -> doingPlan
+	
+	State doingPlan{
+		//println("IL PLANNER E NELLO STATO DOINGPLAN-------------------------------------")
+		onMsg(plannerCmd : plannerCmd(X)){
+			forward robotmind -m plannerCmd : plannerCmd($payloadArg(0))
+		}
+		onMsg(plannerTask : plannerTask(X)){
+			//println("RICEVUTO PLANNERTASK---------------  ${payloadArg(0)}")
+			
+			forward robotmind -m plannerTask : plannerTask($payloadArg(0))
+		}
+		onMsg(registerAck : registerAck(X)){
+			//println("RICEVUTO REGISTER ACK DA PARTE DELLA ROBOT MIND --------------------------")
+			run itunibo.robot.plannerBhestie.registerAck("${payloadArg(0)}")
+			run itunibo.robot.plannerBhestie.requestNextMove()
+		}
+		onMsg(requestNextMove : requestNextMove(X)){
+			run itunibo.robot.plannerBhestie.requestNextMove()
+		}
+	}Transition t0 whenMsg plannerCmd -> doingPlan
+	whenMsg plannerTask -> doingPlan
+	whenMsg registerAck -> doingPlan
+	whenMsg endTaskEventCmd -> endPlan
+	whenMsg requestNextMove -> doingPlan
+	
+	State endPlan{
+		forward robotmind -m endTaskEventCmd : endTaskEventCmd()
+	}Goto waitCmd
+	
+}
+
+
+QActor basicrobot context ctxRobotMind {
+	State s0 initial { 
+  		solve( consult("basicRobotConfig.pl") )   
+ 		solve( robot(R, PORT) )  //R = virtual | realmbot | realnano
+ 		
+ 		
+  		ifSolved{ println( "USING ROBOT : ${getCurSol(\"R\")},  port= ${getCurSol(\"PORT\")} " ) }
+  		 else{ println("no robot") }
+   		ifSolved{ 
+   			run itunibo.robot.robotSupport.create(myself, @R, @PORT )
+   		}
+ 	}  
+	Goto waitCmd   
+ 	 
+	State waitCmd{  }
+	Transition t0 whenMsg   robotCmd  -> handleRobotCmd
+	whenMsg robotAction -> handleRobotAction
+	
+	State handleRobotAction{
+		onMsg( robotAction : robotAction(ACTION)){
+			run itunibo.robot.robotSupport.executeAction()
+		}
+	}Transition t0 whenMsg   robotCmd  -> handleRobotCmd
+	whenMsg robotAction -> handleRobotAction
+		          
+	State handleRobotCmd{
+		printCurrentMessage 
+		onMsg( robotCmd : robotCmd( MOVE ) ) { //MOVE = w | a | s | d | h | l | r | i
+			run itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})" ) 
+			run itunibo.robot.robotSupport.waitAck()
+		}
+	}
+	Transition t0 whenMsg ackMsg  -> waitAck
+	whenMsg robotCmd -> handleRobotCmd
+	
+	State waitAck{
+		onMsg( ackMsg : ackMsg( X ) ) { //MOVE = w | a | s | d | h | l | r | i
+			forward robotmind -m ackMsg : ackMsg($payloadArg(0))
+		}
+	}Transition t0 whenMsg ackMsg  -> waitAck
+	whenMsg robotCmd -> handleRobotCmd
+	whenMsg robotAction -> handleRobotAction
+}

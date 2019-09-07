@@ -1,5 +1,2 @@
 10
 5
-123;lasagna;2
-122;pane;3
-789;pesce;5

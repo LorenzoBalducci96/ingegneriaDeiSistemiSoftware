@@ -25,15 +25,34 @@ object plannerBhestie{
 	lateinit private var move_to_register: Action
 	lateinit private var foodRequestedList: MutableList<FoodInFridge>
 	
-	fun create( actor: ActorBasic/*, PANTRY_X: String, PANTRY_Y: String,
-   				TABLE_X: String, TABLE_Y: String,
-   				DISHWASHER_X: String, DISHWASHER_Y: String,
-   				FRIDGE_X: String, FRIDGE_Y: String*/){
+	fun setRoomSize(size: String){
+		RoomMap.setRoomSize(Integer.parseInt(size));
+	}
+	
+	fun putPantry(x: String, y: String){
+		RoomMap.getRoomMap().put(Integer.parseInt(x),Integer.parseInt(y),Box.createPantry());
+	}
+	
+	fun putTable(x: String, y: String){
+		RoomMap.getRoomMap().put(Integer.parseInt(x),Integer.parseInt(y),Box.createTable());
+	}
+	
+	fun putDishwasher(x: String, y: String){
+		RoomMap.getRoomMap().put(Integer.parseInt(x),Integer.parseInt(y),Box.createDishwasher());
+	}
+	
+	fun putFridge(x: String, y: String){
+		RoomMap.getRoomMap().put(Integer.parseInt(x),Integer.parseInt(y),Box.createFridge());
+	}
+	
+	
+	fun create( actor: ActorBasic){
 		
 		foodRequestedList = ArrayList<FoodInFridge>()
 		
 		this.actor = actor
 
+		/*
 		var TABLE_X: String = "2";
 		var TABLE_Y: String = "2";
 		var DISHWASHER_X: String = "4";
@@ -42,11 +61,7 @@ object plannerBhestie{
 		var FRIDGE_Y: String = "2";
 		var PANTRY_X: String = "4";
 		var PANTRY_Y: String = "0";
-		
-		RoomMap.getRoomMap().put(Integer.parseInt(TABLE_X),Integer.parseInt(TABLE_Y),Box.createTable());
-		RoomMap.getRoomMap().put(Integer.parseInt(DISHWASHER_X),Integer.parseInt(DISHWASHER_Y),Box.createDishwasher());
-		RoomMap.getRoomMap().put(Integer.parseInt(FRIDGE_X),Integer.parseInt(FRIDGE_Y),Box.createFridge());
-		RoomMap.getRoomMap().put(Integer.parseInt(PANTRY_X),Integer.parseInt(PANTRY_Y),Box.createPantry());
+ 		*/
 		
 		aiutil.initAI();
 	}
@@ -101,7 +116,7 @@ object plannerBhestie{
 						}
 					}else if(goals_step.elementAt(0) is Task){
 						var action: String = (goals_step.elementAt(0) as Task).action
-						actor.autoMsg("plannerTask", "plannerTask(" + action + ")")
+						actor.autoMsg("plannerTask", "plannerTask(\"" + action + "\")")
 					}
 				}
 			}
@@ -135,28 +150,17 @@ object plannerBhestie{
 					aiutil.doPlan()?.let{actions = it; foundPath = true}
 				}
 				aiutil.showMap();
-				
-				actor.autoMsg("ackMsg", "ackMsg(ok)")
-				
-				
-				//opzione 1: il planning deve vedere se il fridge ha o meno il food
-				//actor.autoMsg("fridgeRequest", "fridgeRequest(l)")
-				
-				//opzione 2: il planning non richiede di passare dal fridge
-				//actor!!.autoMsg("foodAvailable", "foodAvailable(ok)")
-				
-				//Da inserire negli stati che richiedono cibo da fridge
-				//----------------------------------
+				requestNextMove();
 			}
-			else if(cmd.startsWith("msg(a:", true)){//add food
+			else if(cmd.startsWith("msg(a_", true)){//add food
 				
-				var payload: String = cmd.substringAfter(":")
+				var payload: String = cmd.substringAfter("_")
 				payload = payload.substringBefore(")")
 				println(payload)
-				var foodCode: String = payload.substringBefore(",")
-				var foodQt: String = payload.substringAfter(",")
+				var foodCode: String = payload.substringBefore("_")
+				var foodQt: String = payload.substringAfter("_")
 				
-				goals_step = mutableListOf(Goal.FRIDGE, Task("get_food_from_fridge(" + payload + ")"),
+				goals_step = mutableListOf(Goal.FRIDGE, Task("get_food_from_fridge_" + payload),
 					 Goal.TABLE, Task("put_food_on_robot_hands_on_table"),
 					 Goal.HR)
 				aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0) as Goal);//prendo i piatti
@@ -167,24 +171,14 @@ object plannerBhestie{
 					aiutil.doPlan()?.let{actions = it; foundPath = true}
 				}
 				aiutil.showMap();
-				
-				actor.autoMsg("fridgeRequest", "fridgeRequest(\"r:" + foodCode + "," + foodQt + "\")")
-				
-				
-				//opzione 1: il planning deve vedere se il fridge ha o meno il food
-				//actor.autoMsg("fridgeRequest", "fridgeRequest(l)")
-				
-				//opzione 2: il planning non richiede di passare dal fridge
-				//actor!!.autoMsg("foodAvailable", "foodAvailable(ok)")
-				
-				//Da inserire negli stati che richiedono cibo da fridge
-				//----------------------------------
+				requestNextMove();
 			}
 			if(cmd.equals("msg(c)", true)){//sparecchia
 				goals_step = mutableListOf(Goal.TABLE, Task("take_all_dishes_from_table"),
 					Goal.DISHWASHER, Task("put_all_dishes_on_dishwasher"),
 					Goal.TABLE, Task("take_all_food_from_table"),
-					Goal.FRIDGE, Task("put_all_food_on_fridge"))
+					Goal.FRIDGE, Task("put_all_food_on_fridge"),
+					Goal.HR)
 				aiutil.initFromToAI(aiutil.initialState.getX(), aiutil.initialState.getY(), aiutil.initialState.getDirection(), goals_step.elementAt(0) as Goal);//prendo i piatti
 				
 				var foundPath: Boolean = false;
@@ -194,19 +188,14 @@ object plannerBhestie{
 					aiutil.doPlan()?.let{actions = it; foundPath = true}
 				}
 				aiutil.showMap();
-				
-				//opzione 1: il planning deve vedere se il fridge ha o meno il food
-				actor.autoMsg("fridgeRequest", "fridgeRequest(l)")
-				
-				//opzione 2: il planning non richiede di passare dal fridge
-				//actor!!.autoMsg("foodAvailable", "foodAvailable(ok)")
-				
-				//Da inserire negli stati che richiedono cibo da fridge
-				//----------------------------------
+				requestNextMove();
 			}
 		}
 	}
 	
+	
+	/*OLD FUNCTION USED WHEN WAS THE PLANNER TO DECIDE IF START OR NOT...
+ 	THAN WE CHANGED THE LOGIC....
 	fun evaluate_food_availability(food : String){
 		GlobalScope.launch(){
 			if(food.substringAfter("Tipo :").substringBefore(" Payload").trim().equals("TYPE_RESPONSE_ID")){
@@ -216,7 +205,7 @@ object plannerBhestie{
 				if(payload.equals("yes"))
 					actor.emit("foodAvailable", "foodAvailable(ok)")
 				else
-					actor.emit("foodUnavailable", "foodUnavailable(ok)")
+					actor.emit("foodUnavailable", "foodUnavailable(\"cibo richiesto non presente nel frigo\")")
 			}
 			else if(food.substringAfter("Tipo :").substringBefore(" Payload").trim().equals("TYPE_RESPONSE_FOOD_LIST")){
 				//decide, in base al parametro String e alla richiesta del food fatta, se sparare un
@@ -272,4 +261,5 @@ object plannerBhestie{
 			}
 		}
 	}
+ 	*/
 }

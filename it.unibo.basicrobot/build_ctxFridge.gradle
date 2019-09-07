@@ -82,10 +82,10 @@ sourceSets {
     main.java.srcDirs += 'resources'
 }
 
-mainClassName = 'it.unibo.ctxBasicRobot.MainCtxBasicRobotKt'
+mainClassName = 'itunibo.fridgeIOT.Main'
 
 jar {
-    println("build_ctxBasicRobot.gradle executing jar")
+    println("build_ctxfridge.gradle executing jar")
     from sourceSets.main.allSource
     manifest {
         attributes 'Main-Class': "$mainClassName"

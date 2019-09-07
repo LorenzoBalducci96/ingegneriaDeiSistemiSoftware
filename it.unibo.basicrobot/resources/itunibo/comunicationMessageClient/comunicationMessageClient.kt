@@ -75,6 +75,10 @@ object comunicationMessageClient {
 				var comunicationMessage: Comunication_Message =
 					gson.fromJson(reader, Comunication_Message::class.java)
 				
+				//var formatted: String = comunicationMessage.toString().replace(":","")
+				//formatted = formatted.replace(" ", "-")
+				//formatted = formatted.replace(",", "_")
+				//formatted = formatted.replace(";", "_")
 				//receivedComunicationMessage = comunicationMessage
 				var msg: String = "recvFoodMsgEvent(" + comunicationMessage.toString() + ")";
 				println(msg)
@@ -82,12 +86,12 @@ object comunicationMessageClient {
 				//actor!!.autoMsg("recvFoodMsgEvent", "recvFoodMsgEvent(ok)")
 				actor!!.autoMsg("recvFoodMsgEvent", "recvFoodMsgEvent(\"" + msg + "\")")     
 	        }
-			if (cmd.startsWith("msg(r", ignoreCase = true)) {
-				//ricevo msh(r:123,2)
-				var payload:String = cmd.substringAfter(":")
+			if (cmd.startsWith("msg(a", ignoreCase = true)) {
+				//ricevo msg(r_123_2)
+				var payload:String = cmd.substringAfter("_")
 				payload = payload.substringBefore(")")
-				var foodCode: String = payload.substringBefore(",")
-				var foodQt: String = payload.substringAfter(",")
+				var foodCode: String = payload.substringBefore("_")
+				var foodQt: String = payload.substringAfter("_")
 	            var gson: Gson = Gson();
 	            var message: Comunication_Message = Comunication_Message(TYPE.TYPE_REQUEST_ID, foodCode + "," + foodQt);
 				
@@ -110,11 +114,13 @@ object comunicationMessageClient {
 				var comunicationMessage: Comunication_Message =
 					gson.fromJson(reader, Comunication_Message::class.java)
 				
-				//receivedComunicationMessage = comunicationMessage
-				var msg: String = "recvFoodMsgEvent(" + comunicationMessage.toString() + ")";
-				println(msg)
+				println(comunicationMessage.toString())
 				
-				actor!!.autoMsg("recvFoodMsgEvent", "recvFoodMsgEvent(\"" + msg + "\")")         
+				if(comunicationMessage.toString().substringAfter("Payload").substringAfter(":").trim().equals("yes")){
+					actor!!.autoMsg("foodAvailable", "foodAvailable(yes)")  
+				}else{
+					actor!!.autoMsg("foodUnavailable", "foodUnavailable(food_unavailable)")  
+				}
 	        }
 		}
     }
@@ -132,6 +138,10 @@ object comunicationMessageClient {
         }
 	}
 	
+	fun removeFromFridge(foodCode: String, foodQtStr: String) {
+		removeFromFridge(foodCode, Integer.parseInt(foodQtStr))
+	}
+	
 	fun addToFridge(foodCode: String, foodDescription: String, foodQt: Int) {
 		var message: Comunication_Message = Comunication_Message(TYPE.TYPE_ADD_FOOD, foodCode + "," + foodDescription + "," + foodQt);
 	    var gson: Gson = Gson();        
@@ -143,6 +153,10 @@ object comunicationMessageClient {
             // TODO Auto-generated catch block
             e.printStackTrace()
         }
+	}
+	
+	fun addToFridge(foodCode: String, foodDescription: String, foodQtString: String) {
+		addToFridge(foodCode, foodDescription, Integer.parseInt(foodQtString))
 	}
 }
 

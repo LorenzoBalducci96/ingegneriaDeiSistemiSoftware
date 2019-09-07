@@ -20,14 +20,39 @@ object roomState {
 	var dishesInRobotHands = 0
 	var dishesInTable = 0 //not updated...
 	
+	var defaultDishesInDishwasherToTake = 0;
+	lateinit var defaultFoodToTakeFromFridge: MutableList<FoodInRoom>
+	
 	lateinit var actor: ActorBasic
+	
+	fun adddefaultFoodToTakeFromFridge(foodId: String, food_description: String, food_qt: String){
+		this.defaultFoodToTakeFromFridge.add(FoodInRoom(Food(foodId, food_description.replace("'", "")),
+			Integer.parseInt(food_qt)))
+	}
+	
+	
+	fun setdefaultDishwasherDishesToTake(defaultDishesInDishwasherToTake: String){
+		this.defaultDishesInDishwasherToTake = Integer.parseInt(defaultDishesInDishwasherToTake)
+	}
+	
+	fun setcleanDishesInPantry(cleanDishesInPantry: String){
+		this.cleanDishesInPantry = Integer.parseInt(cleanDishesInPantry)
+	}
+	
+	fun setdishwasherDishes(dishwasherDishes: String){
+		this.dishwasherDishes = Integer.parseInt(dishwasherDishes)
+	}
 
 	fun create( actor: ActorBasic) {
 		this.actor = actor
 		foodOnTable = ArrayList<FoodInRoom>()
 		foodInRobotHands = ArrayList<FoodInRoom>()
+		defaultFoodToTakeFromFridge = ArrayList<FoodInRoom>()
 		
-		val file = File("C:\\SERVER_DATA\\roomstate.txt")
+		/*
+ 		use prolog in qak system!
+		val file = File("/SERVER_DATA/roomstate.txt")
+		//val file = File("C:\\SERVER_DATA\\roomstate.txt")
 	    val bufferedReader = file.bufferedReader()
 	    val text:List<String> = bufferedReader.readLines()
 		var count: Int = 0;
@@ -43,37 +68,7 @@ object roomState {
 			var quantity : Int = Integer.parseInt(pezzi[2])
 			this.foodOnTable!!.add(FoodInRoom(Food(id, description), quantity))
 		}
-		
-		/*
-		try {
-			val inputStream : InputStream = File("C:\\SERVER_DATA\\roomstate.txt").inputStream()
-					var line: String? = null
-
-					val list : List<String> = inputStream.bufferedReader().useLines {
-				lines: Sequence<String> -> lines.take(2).toList()
-			}
-			
-			this.cleanDishesInPantry = Integer.parseInt(list.get(0))
-					this.dishwasherDishes = Integer.parseInt(list.get(1))
-
-					val lineList = mutableListOf<String>()
-
-					inputStream.bufferedReader().useLines {
-							lines -> lines.forEach {
-						var st : StringTokenizer = StringTokenizer(it, ";")
-						var id: String = st.nextToken()
-						var description : String = st.nextToken()
-						var quantity : Int = Integer.parseInt(st.nextToken())
-						this.foodOnTable!!.add(FoodInRoom(Food(id, description), quantity))
-							}
-					}
-			lineList.forEach{ println(">  " + it) }
-
-		} catch (e: IOException) {
-			e.printStackTrace()
-		}
- 		*/
-
+	    */
 	}
 	
 	fun addDish(where: String){
@@ -90,8 +85,9 @@ object roomState {
 		}
 	}
 	
-	fun addFoodOnTable(food: String){
-		
+	fun addFoodOnTable(foodId: String, food_description: String, food_qt: String){
+		this.foodOnTable.add(FoodInRoom(Food(foodId, food_description.replace("'", "")),
+			Integer.parseInt(food_qt)))
 	}
 	
 	fun emitRoomState(){
@@ -100,7 +96,6 @@ object roomState {
 		msgPayload += "" + cleanDishesInPantry + ";"
 		msgPayload += "" + dishwasherDishes + ";"
 		foodOnTable.iterator().forEach {
-			println("sono dentro il ciclo")
 			msgPayload += it.getFood().foodId + "," + it.getFood().description + "," + it.quantity + ";";
 		}
 		actor.autoMsg("roomStateEvent", "roomStateEvent(\"" + msgPayload + "\")")     
@@ -108,73 +103,65 @@ object roomState {
 	}
 	
 	fun updateState(cmd: String){
-		if(cmd.startsWith("take_default_initialization_dish")){
-			var file = File("C:\\SERVER_DATA\\default_room_take.txt")
-			var bufferedReader = file.bufferedReader()
-			var text:String = bufferedReader.readLine()
-			var dishesNumToTake: Int = Integer.parseInt(text)
-			if(dishwasherDishes >= dishesNumToTake){
-				dishwasherDishes -= dishesNumToTake
-				dishesInRobotHands = dishesNumToTake
-			}else{
-				dishesInRobotHands = dishwasherDishes
-				dishwasherDishes = 0
+		GlobalScope.launch(){
+			if(cmd.startsWith("take_default_initialization_dish")){
+				var dishesNumToTake: Int = defaultDishesInDishwasherToTake
+				if(dishwasherDishes >= dishesNumToTake){
+					dishwasherDishes -= dishesNumToTake
+					dishesInRobotHands = dishesNumToTake
+				}else{
+					dishesInRobotHands = dishwasherDishes
+					dishwasherDishes = 0
+				}
 			}
-		}
-		else if(cmd.startsWith("put_food_on_robot_hands_on_table")){
-			dishesInTable += dishesInRobotHands;
-			
-			foodInRobotHands.iterator().forEach { theFoodInRobotHands ->
-				var found: Boolean = false
-				foodOnTable.iterator().forEach { theFoodOnTable ->
-					if(theFoodOnTable.food.foodId.equals(theFoodInRobotHands.food.foodId)){
-						found = true
-						theFoodOnTable.quantity += theFoodInRobotHands.quantity
+			else if(cmd.startsWith("put_food_on_robot_hands_on_table")){
+				dishesInTable += dishesInRobotHands;
+				
+				foodInRobotHands.iterator().forEach { theFoodInRobotHands ->
+					var found: Boolean = false
+					foodOnTable.iterator().forEach { theFoodOnTable ->
+						if(theFoodOnTable.food.foodId.equals(theFoodInRobotHands.food.foodId)){
+							found = true
+							theFoodOnTable.quantity += theFoodInRobotHands.quantity
+						}
+					}
+					if(!found){
+						foodOnTable.add(theFoodInRobotHands)
 					}
 				}
-				if(!found){
-					foodOnTable.add(theFoodInRobotHands)
+			}
+			else if(cmd.startsWith("take_default_initialization_food")){
+				defaultFoodToTakeFromFridge.iterator().forEach {
+					foodInRobotHands.add(it)
+					actor.autoMsg("removeFromFridge",
+						"removeFromFridge(" + it.food.getFoodId() + "," + it.quantity.toString() + ")")
 				}
 			}
-		}
-		else if(cmd.startsWith("take_default_initialization_food")){
-			var file = File("C:\\SERVER_DATA\\default_room_take.txt")
-			var bufferedReader = file.bufferedReader()
-			bufferedReader.readLine()//leggo l'int iniziale che codifica il numero di piatti da prendere
-			var text:List<String> = bufferedReader.readLines()//leggo tutti i food da prendere
-			var iterator: Iterator<String> = text.iterator()
-			
-			while(iterator.hasNext()){
-				var pezzi: List<String> = iterator.next().split(",")
-				var id: String = pezzi[0]
-				var description : String = pezzi[1]
-				var quantity : Int = Integer.parseInt(pezzi[2])
-				this.foodInRobotHands!!.add(FoodInRoom(Food(id, description), quantity))
-				itunibo.comunicationMessageClient.comunicationMessageClient.removeFromFridge(id, quantity)
-			}
-		}
-		else if(cmd.startsWith("put_default_initialization_food")){
-			println("ERROR: NO PREVISED STATE!")
-			foodOnTable = foodInRobotHands
-			foodInRobotHands.clear()
-		}else if(cmd.startsWith("get_food_from_fridge")){
-			//get_food_from_fridge(123,2)
-			var foodCode: String = cmd.substringAfter("get_food_from_fridge(").substringBefore(",")
-			var foodQt: Int = Integer.parseInt(cmd.substringAfter(",").substringBefore(")"))
-			foodInRobotHands.add(FoodInRoom(Food(foodCode), foodQt))
-			itunibo.comunicationMessageClient.comunicationMessageClient.removeFromFridge(foodCode, foodQt)
-		}else if(cmd.startsWith("take_all_dishes_from_table")){
-			dishesInRobotHands = dishesInTable;
-			dishesInTable = 0;
-		}else if(cmd.startsWith("put_all_dishes_on_dishwasher")){
-			dishwasherDishes = dishesInRobotHands
-			dishesInRobotHands = 0;
-		}else if(cmd.startsWith("take_all_food_from_table")){
-			foodInRobotHands = foodOnTable;
-			foodOnTable.clear();
-		}else if(cmd.startsWith("put_all_food_on_fridge")){
-			foodInRobotHands.iterator().forEach {
-				itunibo.comunicationMessageClient.comunicationMessageClient.addToFridge(it.food.foodId, it.food.description, it.quantity)
+			else if(cmd.startsWith("put_default_initialization_food")){
+				println("ERROR: NO PREVISED STATE!")
+				foodOnTable = foodInRobotHands
+				foodInRobotHands.clear()
+			}else if(cmd.startsWith("get_food_from_fridge")){
+				//get_food_from_fridge(123,2)
+				var foodCode: String = cmd.substringAfter("get_food_from_fridge_").substringBefore("_")
+				var foodQt: Int = Integer.parseInt(cmd.substringAfter("get_food_from_fridge_").substringAfter("_"))
+				foodInRobotHands.add(FoodInRoom(Food(foodCode), foodQt))
+				actor.autoMsg("removeFromFridge",
+						"removeFromFridge(\"" + foodCode + "\", \"" + foodQt.toString() + "\")")
+			}else if(cmd.startsWith("take_all_dishes_from_table")){
+				dishesInRobotHands = dishesInTable;
+				dishesInTable = 0;
+			}else if(cmd.startsWith("put_all_dishes_on_dishwasher")){
+				dishwasherDishes = dishesInRobotHands
+				dishesInRobotHands = 0;
+			}else if(cmd.startsWith("take_all_food_from_table")){
+				foodInRobotHands = foodOnTable.toMutableList();
+				foodOnTable.clear();
+			}else if(cmd.startsWith("put_all_food_on_fridge")){
+				foodInRobotHands.iterator().forEach {
+					actor.autoMsg("addToFridge",
+						"addToFridge(\"" + it.food.foodId + "\",\"" + it.food.description + "\",\"" +  it.quantity.toString() + "\")")
+				}
 			}
 		}
 	}

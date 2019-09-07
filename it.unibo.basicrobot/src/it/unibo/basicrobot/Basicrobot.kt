@@ -15,7 +15,6 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 	}
 		
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		var ok_take_food = true
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -27,9 +26,6 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 						{ println("no robot")
 						 }
 						if(currentSolution.isSuccess()) { itunibo.robot.robotSupport.create(myself ,getCurSol("R").toString(), getCurSol("PORT").toString() )
-						itunibo.robot.plannerBhestie.create(myself)
-						itunibo.robot.roomState.create(myself)
-						itunibo.comunicationMessageClient.comunicationMessageClient.init(myself)
 						 }
 					}
 					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
@@ -37,146 +33,41 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 				state("waitCmd") { //this:State
 					action { //it:State
 					}
-					 transition(edgeName="t00",targetState="handleUserCmd",cond=whenEvent("userCmd"))
-					transition(edgeName="t01",targetState="handleUserCmd",cond=whenDispatch("robotCmd"))
-					transition(edgeName="t02",targetState="handleMaitreCmd",cond=whenEvent("maitreCmd"))
-					transition(edgeName="t03",targetState="handleFridgeRequest",cond=whenEvent("fridgeRequest"))
-					transition(edgeName="t04",targetState="handleRecvFoodMsgEvent",cond=whenEvent("recvFoodMsgEvent"))
-					transition(edgeName="t05",targetState="handleRoomStateRequest",cond=whenEvent("roomStateRequest"))
-					transition(edgeName="t06",targetState="handleRoomStateEvent",cond=whenEvent("roomStateEvent"))
+					 transition(edgeName="t035",targetState="handleRobotCmd",cond=whenDispatch("robotCmd"))
+					transition(edgeName="t036",targetState="handleRobotAction",cond=whenDispatch("robotAction"))
 				}	 
-				state("handleRoomStateEvent") { //this:State
+				state("handleRobotAction") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("roomStateEvent(X)"), Term.createTerm("roomStateEvent(X)"), 
+						if( checkMsgContent( Term.createTerm("robotAction(ACTION)"), Term.createTerm("robotAction(ACTION)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								emit("roomStateEvent", "roomStateEvent(${payloadArg(0)})" ) 
+								itunibo.robot.robotSupport.executeAction(  )
 						}
 					}
-					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
+					 transition(edgeName="t037",targetState="handleRobotCmd",cond=whenDispatch("robotCmd"))
+					transition(edgeName="t038",targetState="handleRobotAction",cond=whenDispatch("robotAction"))
 				}	 
-				state("handleRoomStateRequest") { //this:State
-					action { //it:State
-						println("I'M IN HANDLE ROOM STATE REQUEST")
-						if( checkMsgContent( Term.createTerm("roomStateRequest(X)"), Term.createTerm("roomStateRequest(X)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								itunibo.robot.roomState.emitRoomState(  )
-						}
-					}
-					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
-				}	 
-				state("handleFridgeRequest") { //this:State
-					action { //it:State
-						println("I'M IN HANDLEFRIDGEREQUEST STATE")
-						if( checkMsgContent( Term.createTerm("fridgeRequest(X)"), Term.createTerm("fridgeRequest(X)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								itunibo.comunicationMessageClient.comunicationMessageClient.requestFoodList( "msg(${payloadArg(0)})"  )
-						}
-					}
-					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
-				}	 
-				state("handleRecvFoodMsgEvent") { //this:State
-					action { //it:State
-						println("I'M IN HANDLERECVFOODMSGEVENT STATE")
-						if( checkMsgContent( Term.createTerm("recvFoodMsgEvent(X)"), Term.createTerm("recvFoodMsgEvent(X)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								emit("recvFoodMsgEvent", "recvFoodMsgEvent(${payloadArg(0)})" ) 
-						}
-					}
-					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
-				}	 
-				state("handleUserCmd") { //this:State
+				state("handleRobotCmd") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("robotCmd(CMD)"), Term.createTerm("robotCmd(MOVE)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})"  )
-						}
-						if( checkMsgContent( Term.createTerm("userCmd(X)"), Term.createTerm("userCmd(MOVE)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})"  )
-						}
-					}
-					 transition( edgeName="goto",targetState="waitCmd", cond=doswitch() )
-				}	 
-				state("handleMaitreCmd") { //this:State
-					action { //it:State
-						println("I'M IN HANDLEMAITRECMD STATE")
-						if( checkMsgContent( Term.createTerm("maitreCmd(X)"), Term.createTerm("maitreCmd(ACTION)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								println("I'M EXECUTING ACTION FROM HANDLEMAITRECMD")
-								itunibo.robot.plannerBhestie.action( "msg(${payloadArg(0)})"  )
-						}
-					}
-					 transition( edgeName="goto",targetState="waitingPlannerDecision", cond=doswitch() )
-				}	 
-				state("waitingPlannerDecision") { //this:State
-					action { //it:State
-						println("I'M IN WAITING PLANNER DECISION")
-						if( checkMsgContent( Term.createTerm("fridgeRequest(X)"), Term.createTerm("fridgeRequest(X)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								println("RECEIVED FRIDGE REQUEST")
-								itunibo.comunicationMessageClient.comunicationMessageClient.requestFoodList( "msg(${payloadArg(0)})"  )
-						}
-						if( checkMsgContent( Term.createTerm("recvFoodMsgEvent(X)"), Term.createTerm("recvFoodMsgEvent(X)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								println("RECEIVED FOODMSGEVENT")
-								itunibo.robot.plannerBhestie.evaluate_food_availability( "msg(${payloadArg(0)})"  )
-						}
-						if( checkMsgContent( Term.createTerm("foodAvailable(X)"), Term.createTerm("foodAvailable(X)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								println("RECEIVED FOOD AVAILABLE")
-								itunibo.robot.plannerBhestie.requestNextMove(  )
-						}
-						if( checkMsgContent( Term.createTerm("ackMsg(X)"), Term.createTerm("ackMsg(X)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								println("NO FOOD VERIFICATION FOR THIS TASK...REQUEST NEXT MOVE")
-								itunibo.robot.plannerBhestie.requestNextMove(  )
-						}
-					}
-					 transition(edgeName="t07",targetState="waitCmd",cond=whenEvent("foodUnavailable"))
-					transition(edgeName="t08",targetState="waitingPlannerDecision",cond=whenEvent("fridgeRequest"))
-					transition(edgeName="t09",targetState="waitingPlannerDecision",cond=whenEvent("recvFoodMsgEvent"))
-					transition(edgeName="t010",targetState="waitingPlannerDecision",cond=whenEvent("foodAvailable"))
-					transition(edgeName="t011",targetState="waitingPlannerDecision",cond=whenEvent("ackMsg"))
-					transition(edgeName="t012",targetState="waitCmd",cond=whenEvent("foodUnavailable"))
-					transition(edgeName="t013",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
-				}	 
-				state("progressPlanner") { //this:State
-					action { //it:State
-						println("I'M IN PROGRESS PLANNER STATE")
-						if( checkMsgContent( Term.createTerm("plannerTask(X)"), Term.createTerm("plannerTask(X)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								itunibo.robot.roomState.updateState( "${payloadArg(0)}"  )
-								itunibo.robot.robotSupport.executeAction(  )
-								itunibo.robot.plannerBhestie.requestNextMove(  )
-						}
-						if( checkMsgContent( Term.createTerm("plannerCmd(X)"), Term.createTerm("plannerCmd(X)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								itunibo.robot.robotSupport.move( "msg(${payloadArg(0)})"  )
 								itunibo.robot.robotSupport.waitAck(  )
 						}
+					}
+					 transition(edgeName="t039",targetState="waitAck",cond=whenDispatch("ackMsg"))
+					transition(edgeName="t040",targetState="handleRobotCmd",cond=whenDispatch("robotCmd"))
+				}	 
+				state("waitAck") { //this:State
+					action { //it:State
 						if( checkMsgContent( Term.createTerm("ackMsg(X)"), Term.createTerm("ackMsg(X)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								itunibo.robot.plannerBhestie.registerAck( "${payloadArg(0)}"  )
-								itunibo.robot.plannerBhestie.requestNextMove(  )
+								forward("ackMsg", "ackMsg(${payloadArg(0)})" ,"robotmind" ) 
 						}
 					}
-					 transition(edgeName="t014",targetState="stopped",cond=whenEvent("alarm"))
-					transition(edgeName="t015",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
-					transition(edgeName="t016",targetState="progressPlanner",cond=whenEvent("ackMsg"))
-					transition(edgeName="t017",targetState="waitCmd",cond=whenEvent("endTaskEventCmd"))
-					transition(edgeName="t018",targetState="progressPlanner",cond=whenEvent("plannerTask"))
-				}	 
-				state("stopped") { //this:State
-					action { //it:State
-					}
-					 transition(edgeName="t019",targetState="resuming",cond=whenEvent("situationUnderControl"))
-				}	 
-				state("resuming") { //this:State
-					action { //it:State
-						itunibo.robot.plannerBhestie.requestNextMove(  )
-					}
-					 transition(edgeName="t020",targetState="progressPlanner",cond=whenEvent("plannerCmd"))
+					 transition(edgeName="t041",targetState="waitAck",cond=whenDispatch("ackMsg"))
+					transition(edgeName="t042",targetState="handleRobotCmd",cond=whenDispatch("robotCmd"))
+					transition(edgeName="t043",targetState="handleRobotAction",cond=whenDispatch("robotAction"))
 				}	 
 			}
 		}

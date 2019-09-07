@@ -1,6 +1,7 @@
 package itunibo.fridgeIOT;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,12 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
+	
+	
+	
 
 	public static void main(String[] args) {
+	
+	//String filePath = "C:\\SERVER_DATA\\cibo.txt"; 
+	String filePath = "/SERVER_DATA/cibo.txt"; 
+	
 	List<FoodInFridge> listaCibi = new ArrayList<>();
 	String line = null;
 	try {
-		BufferedReader reader = new BufferedReader(new FileReader("C:\\SERVER_DATA\\cibo.txt"));
+		BufferedReader reader = new BufferedReader(new FileReader(filePath));
 		while((line = reader.readLine()) != null) {
 			/**/
 			String[] pezzi = line.split(",");
