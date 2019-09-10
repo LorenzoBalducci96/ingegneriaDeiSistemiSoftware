@@ -297,7 +297,7 @@ QActor basicrobot context ctxRobotMind {
 	
 	State handleRobotAction{
 		onMsg( robotAction : robotAction(ACTION)){
-			run itunibo.robot.robotSupport.executeAction()
+			run itunibo.robot.robotSupport.executeAction("${payloadArg(0)}")
 		}
 	}Transition t0 whenMsg   robotCmd  -> handleRobotCmd
 	whenMsg robotAction -> handleRobotAction

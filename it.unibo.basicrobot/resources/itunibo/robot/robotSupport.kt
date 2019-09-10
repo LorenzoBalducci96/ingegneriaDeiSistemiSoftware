@@ -25,10 +25,10 @@ object robotSupport{
 		}
 	}
 	
-	fun executeAction( ){ //cmd = msg(M) M=w | a | s | d | h
+	fun executeAction( action: String ){ //cmd = msg(M) M=w | a | s | d | h
 		println("robotSupport execute action mock")
 		when( robotKind ){
-			"virtual"  -> { println("not implemented on virtual robot ")}	
+			"virtual"  -> { itunibo.robotVirtual.clientWenvObjTcp.executeAction(action) }	
 			"realmbot" -> { itunibo.robotMbot.mbotSupport.executeAction() }
 			"realnano" -> { println("not implemented on virtual realnano ")}
 			else       -> println( "robot unknown" )
@@ -38,7 +38,7 @@ object robotSupport{
 	fun waitAck(){ //cmd = msg(M) M=w | a | s | d | h
 		println("robotSupport waitAck" )
 		when( robotKind ){
-			"virtual"  -> { println("not implemented yet, program interrupted" ) }
+			"virtual"  -> { itunibo.robotVirtual.clientWenvObjTcp.waitAck( )  }
 			"realmbot" -> { itunibo.robotMbot.mbotSupport.waitAck( ) }
 			"realnano" -> { println("not implemented yet, program interrupted" ) }
 			else       -> println( "robot unknown" )

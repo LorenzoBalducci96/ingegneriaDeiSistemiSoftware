@@ -40,7 +40,7 @@ class Basicrobot ( name: String, scope: CoroutineScope ) : ActorBasicFsm( name, 
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("robotAction(ACTION)"), Term.createTerm("robotAction(ACTION)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								itunibo.robot.robotSupport.executeAction(  )
+								itunibo.robot.robotSupport.executeAction( "${payloadArg(0)}"  )
 						}
 					}
 					 transition(edgeName="t037",targetState="handleRobotCmd",cond=whenDispatch("robotCmd"))
