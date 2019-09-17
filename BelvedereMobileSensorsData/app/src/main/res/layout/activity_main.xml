@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="50sp"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/xAccelValue"
+        android:layout_width="312dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:textColor="@android:color/holo_red_light"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/yAccelValue"
+        android:layout_width="312dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:textColor="@android:color/holo_red_light"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/xGyro"
+        android:layout_width="312dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/yGyro"
+        android:layout_width="312dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textStyle="bold"/>
+    <TextView
+        android:id="@+id/zGyro"
+        android:layout_width="312dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textStyle="bold"/>
+    <TextView
+        android:id="@+id/xMagnValue"
+        android:layout_width="312dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:textColor="@android:color/holo_purple"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/yMagnValue"
+        android:layout_width="312dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:textColor="@android:color/holo_purple"
+        android:textStyle="bold"/>
+    <TextView
+        android:id="@+id/zMagnValue"
+        android:layout_width="312dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:textColor="@android:color/holo_purple"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/pressure"
+        android:layout_width="312dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:textColor="@android:color/holo_green_light"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/light"
+        android:layout_width="312dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:textColor="@android:color/holo_blue_bright"
+        android:textStyle="bold"/>
+
+</LinearLayout>
